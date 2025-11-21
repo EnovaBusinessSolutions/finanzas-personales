@@ -30,18 +30,20 @@ type DashboardResponse = {
   movimientos: Movimiento[];
 };
 
-// Paleta de colores “finanzas pro”
+// Paleta basada en tu diseño:
+// #0b1a3b (azul marino), #d3dedc (fondo), #fffffb (cards), #7d8083 (muted)
 const COLORS = {
-  background: '#020617', // gris muy oscuro
-  card: '#020617',
-  cardSoft: '#0b1120',
-  accent: '#22c55e', // verde principal
-  accentSoft: '#4ade80',
-  text: '#f9fafb',
-  muted: '#9ca3af',
-  border: '#1f2937',
-  positive: '#22c55e',
-  negative: '#fb7185',
+  background: '#d3dedc',
+  card: '#fffffb',
+  cardSoft: '#fffffb',
+  accent: '#0b1a3b',
+  accentSoft: '#0b1a3b',
+  text: '#0b1a3b',
+  muted: '#7d8083',
+  border: '#c4cfcd',
+  // extras para números
+  positive: '#0b8f55',
+  negative: '#c0392b',
 };
 
 export default function Dashboard() {
@@ -141,7 +143,7 @@ export default function Dashboard() {
           <View style={styles.barLegendRow}>
             <View style={styles.legendItem}>
               <View
-                style={[styles.legendDot, { backgroundColor: COLORS.accent }]}
+                style={[styles.legendDot, { backgroundColor: COLORS.positive }]}
               />
               <Text style={styles.legendText}>Ingresos</Text>
             </View>
@@ -242,30 +244,35 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   link: {
-    color: COLORS.accentSoft,
+    color: COLORS.accent,
     fontSize: 16,
     fontWeight: '600',
   },
   card: {
     backgroundColor: COLORS.card,
-    borderRadius: 18,
+    borderRadius: 20,
     padding: 18,
     marginBottom: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
     shadowColor: '#000',
-    shadowOpacity: 0.35,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 4,
   },
   cardSoft: {
     backgroundColor: COLORS.cardSoft,
-    borderRadius: 18,
+    borderRadius: 20,
     padding: 18,
     marginBottom: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
   cardTitle: {
     fontSize: 18,
@@ -285,7 +292,7 @@ const styles = StyleSheet.create({
   resumenLabel: {
     fontSize: 12,
     color: COLORS.muted,
-    marginBottom: 2,
+    marginBottom: 4,
   },
   resumenValue: {
     fontSize: 18,
@@ -306,10 +313,10 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 999,
     overflow: 'hidden',
-    backgroundColor: '#111827',
+    backgroundColor: '#c2cec9',
   },
   barIngresos: {
-    backgroundColor: COLORS.accent,
+    backgroundColor: COLORS.positive,
   },
   barGastos: {
     backgroundColor: COLORS.negative,
@@ -349,8 +356,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   errorText: {
-    color: '#fca5a5',
+    color: COLORS.negative,
     marginBottom: 8,
+    paddingHorizontal: 4,
   },
   rowBetween: {
     flexDirection: 'row',
@@ -358,16 +366,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   smallLink: {
-    color: COLORS.accentSoft,
+    color: COLORS.accent,
     fontSize: 14,
+    fontWeight: '500',
   },
   movimientoCard: {
     marginTop: 12,
     padding: 12,
-    borderRadius: 14,
+    borderRadius: 16,
     backgroundColor: COLORS.card,
     borderWidth: 1,
-    borderColor: '#1e293b',
+    borderColor: COLORS.border,
   },
   movHeaderRow: {
     flexDirection: 'row',
