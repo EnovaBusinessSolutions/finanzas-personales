@@ -31,6 +31,21 @@ type DashboardResponse = {
   movimientos: Movimiento[];
 };
 
+type Account = {
+  id: string;
+  nombre: string;
+  subtitulo: string;
+  saldo: number;
+  tipo: 'bank' | 'card';
+};
+
+type AlertCard = {
+  id: string;
+  titulo: string;
+  subtitulo: string;
+  tone: 'info' | 'warning';
+};
+
 // Paleta basada en tu diseño
 const COLORS = {
   primary: '#0b1a3b', // azul oscuro principal
@@ -52,6 +67,39 @@ const COLORS = {
   navLabelActive: '#fffffb',
 };
 
+// Datos mock para la UI (por ahora visual)
+const MOCK_ACCOUNTS: Account[] = [
+  {
+    id: '1',
+    nombre: 'Banco principal',
+    subtitulo: 'Saldo disponible',
+    saldo: 54600,
+    tipo: 'bank',
+  },
+  {
+    id: '2',
+    nombre: 'Mastercard',
+    subtitulo: 'Deuda actual',
+    saldo: -930,
+    tipo: 'card',
+  },
+];
+
+const MOCK_ALERTS: AlertCard[] = [
+  {
+    id: '1',
+    titulo: 'Pago próximo: Spotify Premium',
+    subtitulo: 'Vence el 15 de noviembre',
+    tone: 'info',
+  },
+  {
+    id: '2',
+    titulo: 'Te excediste en restaurantes',
+    subtitulo: 'Vas $450 arriba del presupuesto',
+    tone: 'warning',
+  },
+];
+
 // Helper para formatear cantidades
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -62,7 +110,8 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-type TabKey = 'home' | 'reports' | 'goals' | 'settings';
+type BottomTabKey = 'home' | 'reports' | 'goals' | 'settings';
+type TopTabKey = 'balance' | 'savings';
 
 export default function Dashboard() {
   const [health, setHealth] = useState<any | null>(null);
@@ -70,10 +119,18 @@ export default function Dashboard() {
   const [loadingHealth, setLoadingHealth] = useState(false);
   const [loadingDashboard, setLoadingDashboard] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabKey>('home');
+
+  const [activeBottomTab, setActiveBottomTab] =
+    useState<BottomTabKey>('home');
+  const [activeTopTab, setActiveTopTab] = useState<TopTabKey>('balance');
 
   const resumen = dashboard?.resumen ?? { ingresos: 0, gastos: 0, saldo: 0 };
   const movimientos = dashboard?.movimientos ?? [];
+
+  // Para barra ingresos vs gastos
+  const totalBar = resumen.ingresos + Math.abs(resumen.gastos) || 1;
+  const fracIngresos = resumen.ingresos / totalBar;
+  const fracGastos = Math.abs(resumen.gastos) / totalBar;
 
   // 👉 Botón "Probar API" (usa /health)
   async function handleProbarApi() {
@@ -115,60 +172,169 @@ export default function Dashboard() {
         style={styles.container}
         contentContainerStyle={styles.content}
       >
-        {/* Card: Saldo total */}
-        <View style={styles.cardBalance}>
-          <Text style={styles.balanceLabel}>Saldo total</Text>
-          <Text style={styles.balanceValue}>
-            {formatCurrency(resumen.saldo)}
-          </Text>
+        {/* HEADER tipo "FinaFlow" */}
+        <View style={styles.headerRow}>
+          <Ionicons name="close" size={22} color={COLORS.muted} />
+          <Text style={styles.appTitle}>FinaFlow</Text>
+          <Ionicons
+            name="person-circle-outline"
+            size={26}
+            color={COLORS.primary}
+          />
+        </View>
 
-          <View style={styles.chipsRow}>
-            <View style={styles.badge}>
-              <View
-                style={[styles.badgeDot, { backgroundColor: COLORS.income }]}
-              />
-              <Text style={styles.badgeText}>
-                Ingresos {formatCurrency(resumen.ingresos)}
-              </Text>
-            </View>
-            <View style={styles.badge}>
-              <View
-                style={[styles.badgeDot, { backgroundColor: COLORS.expense }]}
-              />
-              <Text style={styles.badgeText}>
-                Gastos {formatCurrency(Math.abs(resumen.gastos))}
+        {/* PATRIMONIO NETO (círculo grande) */}
+        <View style={styles.netWorthCard}>
+          <View style={styles.netWorthCircleOuter}>
+            <View style={styles.netWorthCircleInner}>
+              <Text style={styles.netWorthLabel}>Patrimonio neto</Text>
+              <Text style={styles.netWorthValue}>
+                {formatCurrency(resumen.saldo)}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Card: Presupuesto */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Presupuesto</Text>
+        {/* TABS superiores: Ingresos vs Gastos / Metas de Ahorro */}
+        <View style={styles.topTabsRow}>
+          <TouchableOpacity
+            style={[
+              styles.topTab,
+              activeTopTab === 'balance' && styles.topTabActive,
+            ]}
+            onPress={() => setActiveTopTab('balance')}
+          >
+            <Text
+              style={[
+                styles.topTabText,
+                activeTopTab === 'balance' && styles.topTabTextActive,
+              ]}
+            >
+              Ingresos vs. gastos
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.topTab,
+              activeTopTab === 'savings' && styles.topTabActive,
+            ]}
+            onPress={() => setActiveTopTab('savings')}
+          >
+            <Text
+              style={[
+                styles.topTabText,
+                activeTopTab === 'savings' && styles.topTabTextActive,
+              ]}
+            >
+              Metas de ahorro
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-          {/* Barra verde */}
-          <View style={styles.budgetBarBackground}>
-            <View style={styles.budgetBarFill} />
-            <View style={styles.budgetBarCap} />
+        {/* BLOQUE PRINCIPAL Ingresos vs Gastos (barra horizontal) */}
+        <View style={styles.flowCard}>
+          <View style={styles.flowHeaderRow}>
+            <Text style={styles.flowTitle}>Ingresos vs gastos</Text>
+            <Text style={styles.flowAmount}>
+              {formatCurrency(resumen.ingresos - Math.abs(resumen.gastos))}
+            </Text>
           </View>
 
-          <View style={styles.budgetRow}>
-            <View style={styles.budgetColumn}>
-              <Text style={styles.budgetLabel}>Ingresos</Text>
-              <Text style={[styles.budgetValue, { color: COLORS.income }]}>
-                {formatCurrency(resumen.ingresos)}
-              </Text>
+          {/* Barra horizontal */}
+          <View style={styles.flowBarBackground}>
+            <View style={[styles.flowBarIngresos, { flex: fracIngresos }]} />
+            <View style={[styles.flowBarGastos, { flex: fracGastos }]} />
+          </View>
+
+          {/* Etiquetas ingresos / gastos */}
+          <View style={styles.flowBottomRow}>
+            <View style={styles.flowStat}>
+              <View
+                style={[
+                  styles.flowDot,
+                  { backgroundColor: COLORS.income },
+                ]}
+              />
+              <View>
+                <Text style={styles.flowStatLabel}>Ingresos</Text>
+                <Text style={styles.flowStatValue}>
+                  {formatCurrency(resumen.ingresos)}
+                </Text>
+              </View>
             </View>
-            <View style={styles.budgetColumn}>
-              <Text style={styles.budgetLabel}>Gastos</Text>
-              <Text style={[styles.budgetValue, { color: COLORS.expense }]}>
-                {formatCurrency(Math.abs(resumen.gastos))}
-              </Text>
+
+            <View style={styles.flowStat}>
+              <View
+                style={[
+                  styles.flowDot,
+                  { backgroundColor: COLORS.expense },
+                ]}
+              />
+              <View>
+                <Text style={styles.flowStatLabel}>Gastos</Text>
+                <Text style={styles.flowStatValue}>
+                  {formatCurrency(Math.abs(resumen.gastos))}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
 
-        {/* Card: Respuesta API */}
+        {/* MIS CUENTAS */}
+        <Text style={styles.sectionTitle}>Mis cuentas</Text>
+        {MOCK_ACCOUNTS.map((acc) => (
+          <View key={acc.id} style={styles.accountCard}>
+            <View style={styles.accountLeft}>
+              <View style={styles.accountIconCircle}>
+                <Ionicons
+                  name={acc.tipo === 'bank' ? 'card-outline' : 'wallet-outline'}
+                  size={20}
+                  color={COLORS.card}
+                />
+              </View>
+              <View>
+                <Text style={styles.accountName}>{acc.nombre}</Text>
+                <Text style={styles.accountSubtitle}>
+                  {acc.subtitulo}
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.accountBalance}>
+              {formatCurrency(acc.saldo)}
+            </Text>
+          </View>
+        ))}
+
+        {/* ALERTAS PERSONALIZADAS */}
+        <Text style={styles.sectionTitle}>Alertas personalizadas</Text>
+        <View style={styles.alertsRow}>
+          {MOCK_ALERTS.map((alert) => (
+            <View
+              key={alert.id}
+              style={[
+                styles.alertCard,
+                alert.tone === 'warning' && styles.alertCardWarning,
+              ]}
+            >
+              <View style={styles.alertHeaderRow}>
+                <Ionicons
+                  name={
+                    alert.tone === 'warning'
+                      ? 'warning-outline'
+                      : 'notifications-outline'
+                  }
+                  size={18}
+                  color={COLORS.primary}
+                  style={{ marginRight: 6 }}
+                />
+                <Text style={styles.alertTitle}>{alert.titulo}</Text>
+              </View>
+              <Text style={styles.alertSubtitle}>{alert.subtitulo}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* RESPUESTA API (para debug / pruebas) */}
         <View style={styles.card}>
           <View style={styles.rowBetween}>
             <Text style={styles.cardTitle}>Respuesta de la API</Text>
@@ -197,10 +363,10 @@ export default function Dashboard() {
           )}
         </View>
 
-        {/* Errores */}
+        {/* ERRORES */}
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        {/* Card: Movimientos */}
+        {/* ÚLTIMOS MOVIMIENTOS (con datos reales del backend) */}
         <View style={styles.card}>
           <View style={styles.rowBetween}>
             <Text style={styles.cardTitle}>Últimos movimientos</Text>
@@ -246,23 +412,25 @@ export default function Dashboard() {
             ))}
         </View>
 
-        {/* Espacio para que el scroll no quede debajo del nav */}
+        {/* Espacio para que el scroll no quede detrás del nav */}
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Bottom Nav */}
+      {/* Bottom Nav (igual que tenías, sólo usando iconos válidos) */}
       <View style={styles.navBarContainer}>
         <View style={styles.navBar}>
           {/* Inicio */}
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => setActiveTab('home')}
+            onPress={() => setActiveBottomTab('home')}
           >
             <Ionicons
-              name={activeTab === 'home' ? 'home' : 'home-outline'}
+              name={
+                activeBottomTab === 'home' ? 'home' : 'home-outline'
+              }
               size={22}
               color={
-                activeTab === 'home'
+                activeBottomTab === 'home'
                   ? COLORS.navIconActive
                   : COLORS.navIconInactive
               }
@@ -270,7 +438,7 @@ export default function Dashboard() {
             <Text
               style={[
                 styles.navLabel,
-                activeTab === 'home' && styles.navLabelActive,
+                activeBottomTab === 'home' && styles.navLabelActive,
               ]}
             >
               Inicio
@@ -280,15 +448,17 @@ export default function Dashboard() {
           {/* Reportes */}
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => setActiveTab('reports')}
+            onPress={() => setActiveBottomTab('reports')}
           >
             <Ionicons
               name={
-                activeTab === 'reports' ? 'bar-chart' : 'bar-chart-outline'
+                activeBottomTab === 'reports'
+                  ? 'stats-chart'
+                  : 'stats-chart-outline'
               }
               size={22}
               color={
-                activeTab === 'reports'
+                activeBottomTab === 'reports'
                   ? COLORS.navIconActive
                   : COLORS.navIconInactive
               }
@@ -296,7 +466,7 @@ export default function Dashboard() {
             <Text
               style={[
                 styles.navLabel,
-                activeTab === 'reports' && styles.navLabelActive,
+                activeBottomTab === 'reports' && styles.navLabelActive,
               ]}
             >
               Reportes
@@ -313,13 +483,15 @@ export default function Dashboard() {
           {/* Metas */}
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => setActiveTab('goals')}
+            onPress={() => setActiveBottomTab('goals')}
           >
             <Ionicons
-              name={activeTab === 'goals' ? 'flag' : 'flag-outline'}
+              name={
+                activeBottomTab === 'goals' ? 'flag' : 'flag-outline'
+              }
               size={22}
               color={
-                activeTab === 'goals'
+                activeBottomTab === 'goals'
                   ? COLORS.navIconActive
                   : COLORS.navIconInactive
               }
@@ -327,7 +499,7 @@ export default function Dashboard() {
             <Text
               style={[
                 styles.navLabel,
-                activeTab === 'goals' && styles.navLabelActive,
+                activeBottomTab === 'goals' && styles.navLabelActive,
               ]}
             >
               Metas
@@ -337,13 +509,17 @@ export default function Dashboard() {
           {/* Ajustes */}
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => setActiveTab('settings')}
+            onPress={() => setActiveBottomTab('settings')}
           >
             <Ionicons
-              name={activeTab === 'settings' ? 'settings' : 'settings-outline'}
+              name={
+                activeBottomTab === 'settings'
+                  ? 'settings'
+                  : 'settings-outline'
+              }
               size={22}
               color={
-                activeTab === 'settings'
+                activeBottomTab === 'settings'
                   ? COLORS.navIconActive
                   : COLORS.navIconInactive
               }
@@ -351,7 +527,8 @@ export default function Dashboard() {
             <Text
               style={[
                 styles.navLabel,
-                activeTab === 'settings' && styles.navLabelActive,
+                activeBottomTab === 'settings' &&
+                  styles.navLabelActive,
               ]}
             >
               Ajustes
@@ -376,49 +553,220 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
 
-  // Tarjetas
-  cardBalance: {
-    backgroundColor: COLORS.card,
-    borderRadius: 28,
-    padding: 20,
-    marginBottom: 16,
-  },
-  balanceLabel: {
-    fontSize: 18,
-    color: COLORS.muted,
-    marginBottom: 8,
-  },
-  balanceValue: {
-    fontSize: 34,
-    fontWeight: '800',
-    color: COLORS.text,
-    marginBottom: 16,
-  },
-  chipsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    flexWrap: 'wrap',
-  },
-  badge: {
+  // Header
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e5edf0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
-  badgeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 999,
-    marginRight: 6,
-  },
-  badgeText: {
-    fontSize: 13,
+  appTitle: {
+    fontSize: 20,
+    fontWeight: '700',
     color: COLORS.text,
-    fontWeight: '600',
   },
 
+  // Patrimonio neto
+  netWorthCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 24,
+    paddingVertical: 24,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  netWorthCircleOuter: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    borderWidth: 12,
+    borderColor: '#e5e7eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  netWorthCircleInner: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: COLORS.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  netWorthLabel: {
+    fontSize: 13,
+    color: COLORS.muted,
+    marginBottom: 4,
+  },
+  netWorthValue: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: COLORS.text,
+  },
+
+  // Top tabs
+  topTabsRow: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  topTab: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  topTabActive: {
+    backgroundColor: COLORS.card,
+  },
+  topTabText: {
+    fontSize: 13,
+    color: COLORS.muted,
+    fontWeight: '500',
+  },
+  topTabTextActive: {
+    color: COLORS.text,
+    fontWeight: '700',
+  },
+
+  // Card Ingresos vs Gastos
+  flowCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 24,
+    padding: 18,
+    marginBottom: 20,
+  },
+  flowHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  flowTitle: {
+    fontSize: 15,
+    color: COLORS.muted,
+  },
+  flowAmount: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  flowBarBackground: {
+    flexDirection: 'row',
+    height: 10,
+    borderRadius: 999,
+    overflow: 'hidden',
+    backgroundColor: '#e5e7eb',
+    marginBottom: 10,
+  },
+  flowBarIngresos: {
+    backgroundColor: COLORS.income,
+  },
+  flowBarGastos: {
+    backgroundColor: COLORS.expense,
+  },
+  flowBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 4,
+  },
+  flowStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  flowDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 8,
+  },
+  flowStatLabel: {
+    fontSize: 11,
+    color: COLORS.muted,
+  },
+  flowStatValue: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+
+  // Secciones
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+
+  // Cuentas
+  accountCard: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 18,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  accountLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  accountIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  accountName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.card,
+  },
+  accountSubtitle: {
+    fontSize: 12,
+    color: '#cbd5f5',
+    marginTop: 2,
+  },
+  accountBalance: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.card,
+  },
+
+  // Alertas
+  alertsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  alertCard: {
+    flex: 1,
+    backgroundColor: '#e5edf0',
+    borderRadius: 16,
+    padding: 12,
+    marginRight: 8,
+  },
+  alertCardWarning: {
+    backgroundColor: '#facc15',
+  },
+  alertHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  alertTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  alertSubtitle: {
+    fontSize: 11,
+    color: COLORS.text,
+  },
+
+  // Card genérica (API, movimientos)
   card: {
     backgroundColor: COLORS.card,
     borderRadius: 24,
@@ -430,45 +778,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.text,
     marginBottom: 10,
-  },
-
-  // Presupuesto
-  budgetBarBackground: {
-    height: 10,
-    borderRadius: 999,
-    backgroundColor: '#d1e5d5',
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  budgetBarFill: {
-    flex: 1,
-    backgroundColor: COLORS.income,
-  },
-  budgetBarCap: {
-    position: 'absolute',
-    right: 4,
-    top: 1.5,
-    width: 7,
-    height: 7,
-    borderRadius: 999,
-    backgroundColor: '#059669',
-  },
-  budgetRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  budgetColumn: {
-    flex: 1,
-  },
-  budgetLabel: {
-    fontSize: 14,
-    color: COLORS.muted,
-    marginBottom: 2,
-  },
-  budgetValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.text,
   },
 
   // API
