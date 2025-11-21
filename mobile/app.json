@@ -1,0 +1,13 @@
+{
+"expo": {
+"name": "Finanzas",
+"slug": "finanzas",
+"scheme": "finanzas",
+"ios": { "bundleIdentifier": "com.tuempresa.finanzas" },
+"android": { "package": "com.tuempresa.finanzas" },
+"extra": {
+"eas": { "projectId": "RELLENAR_SI_USAS_EAS" },
+"API_URL": "http://192.168.1.11:3001"
+}
+}
+}
