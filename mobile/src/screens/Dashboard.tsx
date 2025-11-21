@@ -749,7 +749,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   alertCardWarning: {
-    backgroundColor: '#facc15',
+    backgroundColor: '#fffad0',
   },
   alertHeaderRow: {
     flexDirection: 'row',
