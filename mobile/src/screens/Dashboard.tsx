@@ -21,7 +21,7 @@ type Movimiento = {
 };
 
 type DashboardResponse = {
-  ok?: boolean; // opcional, por si el backend lo manda
+  ok?: boolean;
   resumen: {
     ingresos: number;
     gastos: number;
@@ -30,20 +30,15 @@ type DashboardResponse = {
   movimientos: Movimiento[];
 };
 
-// Paleta basada en tu diseño:
-// #0b1a3b (azul marino), #d3dedc (fondo), #fffffb (cards), #7d8083 (muted)
+// Paleta basada en la imagen 2
 const COLORS = {
-  background: '#d3dedc',
-  card: '#fffffb',
-  cardSoft: '#fffffb',
-  accent: '#0b1a3b',
-  accentSoft: '#0b1a3b',
-  text: '#0b1a3b',
+  primary: '#0b1a3b', // azul oscuro
+  background: '#d3dedc', // gris verdoso claro
+  card: '#fffffb', // casi blanco
   muted: '#7d8083',
-  border: '#c4cfcd',
-  // extras para números
-  positive: '#0b8f55',
-  negative: '#c0392b',
+  borderSoft: 'rgba(11, 26, 59, 0.08)',
+  income: '#16a34a', // verde para ingresos
+  expense: '#f97316', // naranja para gastos
 };
 
 export default function Dashboard() {
@@ -53,11 +48,10 @@ export default function Dashboard() {
   const [loadingDashboard, setLoadingDashboard] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Valores derivados (si aún no hay data, usamos defaults)
   const resumen = dashboard?.resumen ?? { ingresos: 0, gastos: 0, saldo: 0 };
   const movimientos = dashboard?.movimientos ?? [];
 
-  // 👉 Botón "Probar API" (usa /health)
+  // 👉 Botón "Probar API"
   async function handleProbarApi() {
     try {
       setLoadingHealth(true);
@@ -72,7 +66,7 @@ export default function Dashboard() {
     }
   }
 
-  // 👉 Cargar dashboard (/dashboard-demo)
+  // 👉 Cargar dashboard
   async function loadDashboard() {
     try {
       setLoadingDashboard(true);
@@ -87,122 +81,134 @@ export default function Dashboard() {
     }
   }
 
-  // Cargar al montar la pantalla
   useEffect(() => {
     loadDashboard();
   }, []);
 
-  // Para la barrita Ingresos vs Gastos
-  const totalParaBarra =
-    resumen.ingresos + Math.abs(resumen.gastos) || 1; // evitar división por 0
-  const fracIngresos = resumen.ingresos / totalParaBarra;
-  const fracGastos = Math.abs(resumen.gastos) / totalParaBarra;
+  // Para la barra de presupuesto
+  const totalBarra = resumen.ingresos + Math.abs(resumen.gastos) || 1;
+  const fracIngresos = resumen.ingresos / totalBarra;
+  const fracGastos = Math.abs(resumen.gastos) / totalBarra;
+
+  const saldoFormateado = `$${resumen.saldo.toFixed(2)}`;
+  const ingresosFormateados = `$${resumen.ingresos.toFixed(2)}`;
+  const gastosFormateados = `$${Math.abs(resumen.gastos).toFixed(2)}`;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>Dashboard</Text>
-        <TouchableOpacity onPress={handleProbarApi}>
-          <Text style={styles.link}>
-            {loadingHealth ? 'Probando…' : 'Probar API'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Resumen rápido */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Resumen rápido</Text>
-        <View style={styles.resumenRow}>
-          <View style={styles.resumenItem}>
-            <Text style={styles.resumenLabel}>Ingresos</Text>
-            <Text style={[styles.resumenValue, styles.positivo]}>
-              ${resumen.ingresos.toFixed(2)}
-            </Text>
-          </View>
-          <View style={styles.resumenItem}>
-            <Text style={styles.resumenLabel}>Gastos</Text>
-            <Text style={[styles.resumenValue, styles.negativo]}>
-              ${resumen.gastos.toFixed(2)}
-            </Text>
-          </View>
-          <View style={styles.resumenItem}>
-            <Text style={styles.resumenLabel}>Saldo</Text>
-            <Text style={[styles.resumenValue, styles.positivo]}>
-              ${resumen.saldo.toFixed(2)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Barrita Ingresos vs Gastos */}
-        <View style={styles.barWrapper}>
-          <View style={styles.barBackground}>
-            <View style={[styles.barIngresos, { flex: fracIngresos }]} />
-            <View style={[styles.barGastos, { flex: fracGastos }]} />
-          </View>
-          <View style={styles.barLegendRow}>
-            <View style={styles.legendItem}>
-              <View
-                style={[styles.legendDot, { backgroundColor: COLORS.positive }]}
-              />
-              <Text style={styles.legendText}>Ingresos</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View
-                style={[styles.legendDot, { backgroundColor: COLORS.negative }]}
-              />
-              <Text style={styles.legendText}>Gastos</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      {/* Respuesta de /health */}
-      <View style={styles.cardSoft}>
-        <Text style={styles.cardTitle}>Respuesta de la API</Text>
-        {loadingHealth && <ActivityIndicator color={COLORS.accent} />}
-        {!loadingHealth && health && (
-          <Text style={styles.jsonText}>
-            {JSON.stringify(health, null, 2)}
-          </Text>
-        )}
-        {!loadingHealth && !health && (
-          <Text style={styles.muted}>
-            Pulsa "Probar API" para ver la respuesta.
-          </Text>
-        )}
-      </View>
-
-      {/* Errores */}
-      {error && <Text style={styles.errorText}>{error}</Text>}
-
-      {/* Lista de movimientos */}
-      <View style={styles.cardSoft}>
-        <View style={styles.rowBetween}>
-          <Text style={styles.cardTitle}>Últimos movimientos</Text>
-          <TouchableOpacity onPress={loadDashboard}>
-            <Text style={styles.smallLink}>
-              {loadingDashboard ? 'Cargando…' : 'Recargar'}
+    <View style={styles.container}>
+      {/* CONTENIDO SCROLLABLE */}
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        {/* Header */}
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>Dashboard</Text>
+          <TouchableOpacity onPress={handleProbarApi}>
+            <Text style={styles.link}>
+              {loadingHealth ? 'Probando…' : 'Probar API'}
             </Text>
           </TouchableOpacity>
         </View>
 
-        {loadingDashboard && (
-          <ActivityIndicator
-            color={COLORS.accent}
-            style={{ marginTop: 8 }}
-          />
-        )}
+        {/* Card Saldo total (tipo imagen 3) */}
+        <View style={styles.balanceCard}>
+          <Text style={styles.cardLabel}>Saldo total</Text>
+          <Text style={styles.balanceAmount}>{saldoFormateado}</Text>
 
-        {!loadingDashboard &&
-          movimientos.map((mov) => (
-            <View key={mov.id} style={styles.movimientoCard}>
-              <View style={styles.movHeaderRow}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.movDescripcion}>
-                    {mov.descripcion}
-                  </Text>
+          <View style={styles.balanceRow}>
+            <View style={styles.balancePill}>
+              <View
+                style={[styles.pillDot, { backgroundColor: COLORS.income }]}
+              />
+              <Text style={styles.pillText}>Ingresos {ingresosFormateados}</Text>
+            </View>
+            <View style={styles.balancePill}>
+              <View
+                style={[styles.pillDot, { backgroundColor: COLORS.expense }]}
+              />
+              <Text style={styles.pillText}>Gastos {gastosFormateados}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Card Presupuesto (barra ingresos vs gastos) */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Presupuesto</Text>
+          <View style={styles.budgetBarBackground}>
+            <View
+              style={[
+                styles.budgetSegmentIncome,
+                { flex: fracIngresos },
+              ]}
+            />
+            <View
+              style={[
+                styles.budgetSegmentExpense,
+                { flex: fracGastos },
+              ]}
+            />
+          </View>
+
+          <View style={styles.budgetRow}>
+            <View style={styles.budgetItem}>
+              <Text style={styles.budgetLabel}>Ingresos</Text>
+              <Text style={[styles.budgetValue, { color: COLORS.income }]}>
+                {ingresosFormateados}
+              </Text>
+            </View>
+            <View style={styles.budgetItem}>
+              <Text style={styles.budgetLabel}>Gastos</Text>
+              <Text style={[styles.budgetValue, { color: COLORS.expense }]}>
+                {gastosFormateados}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Card Respuesta API (debug/tecnica) */}
+        <View style={styles.card}>
+          <View style={styles.rowBetween}>
+            <Text style={styles.cardTitle}>Respuesta de la API</Text>
+          </View>
+          {loadingHealth && <ActivityIndicator color={COLORS.primary} />}
+          {!loadingHealth && health && (
+            <Text style={styles.jsonText}>
+              {JSON.stringify(health, null, 2)}
+            </Text>
+          )}
+          {!loadingHealth && !health && (
+            <Text style={styles.muted}>
+              Pulsa "Probar API" para ver la respuesta.
+            </Text>
+          )}
+        </View>
+
+        {/* Errores */}
+        {error && <Text style={styles.errorText}>{error}</Text>}
+
+        {/* Card Últimos movimientos */}
+        <View style={styles.card}>
+          <View style={styles.rowBetween}>
+            <Text style={styles.cardTitle}>Últimos movimientos</Text>
+            <TouchableOpacity onPress={loadDashboard}>
+              <Text style={styles.smallLink}>
+                {loadingDashboard ? 'Cargando…' : 'Recargar'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {loadingDashboard && (
+            <ActivityIndicator
+              color={COLORS.primary}
+              style={{ marginTop: 8 }}
+            />
+          )}
+
+          {!loadingDashboard &&
+            movimientos.map((mov) => (
+              <View key={mov.id} style={styles.movimientoRow}>
+                <View style={styles.movLeft}>
+                  <Text style={styles.movDescripcion}>{mov.descripcion}</Text>
                   <Text style={styles.movFecha}>{mov.fecha}</Text>
+                  <Text style={styles.movCategoria}>{mov.categoria}</Text>
                 </View>
                 <Text
                   style={[
@@ -215,132 +221,168 @@ export default function Dashboard() {
                   {mov.monto >= 0 ? `+${mov.monto}` : mov.monto}
                 </Text>
               </View>
-              <Text style={styles.movCategoria}>{mov.categoria}</Text>
-            </View>
-          ))}
+            ))}
+        </View>
+      </ScrollView>
+
+      {/* MENÚ INFERIOR MOCK (como imagen 3) */}
+      <View style={styles.bottomNav}>
+        <View style={styles.navItem}>
+          <View style={styles.navIconActive} />
+          <Text style={styles.navLabelActive}>Inicio</Text>
+        </View>
+        <View style={styles.navItem}>
+          <View style={styles.navIcon} />
+          <Text style={styles.navLabel}>Reportes</Text>
+        </View>
+        <View style={styles.navItemCenter}>
+          <View style={styles.navPlusCircle}>
+            <Text style={styles.navPlusText}>+</Text>
+          </View>
+        </View>
+        <View style={styles.navItem}>
+          <View style={styles.navIcon} />
+          <Text style={styles.navLabel}>Metas</Text>
+        </View>
+        <View style={styles.navItem}>
+          <View style={styles.navIcon} />
+          <Text style={styles.navLabel}>Ajustes</Text>
+        </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  // Layout general
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  content: {
-    padding: 20,
-    paddingBottom: 40,
+  scroll: {
+    flex: 1,
   },
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 110, // espacio para el bottom nav
+  },
+
+  // Header
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   title: {
     fontSize: 32,
     fontWeight: '800',
-    color: COLORS.text,
+    color: COLORS.primary,
   },
   link: {
-    color: COLORS.accent,
+    color: COLORS.primary,
     fontSize: 16,
     fontWeight: '600',
   },
+
+  // Cards base
   card: {
     backgroundColor: COLORS.card,
-    borderRadius: 20,
+    borderRadius: 22,
     padding: 18,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
-  },
-  cardSoft: {
-    backgroundColor: COLORS.cardSoft,
-    borderRadius: 20,
-    padding: 18,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    borderColor: COLORS.borderSoft,
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: '700',
-    marginBottom: 8,
-    color: COLORS.text,
+    marginBottom: 10,
+    color: COLORS.primary,
   },
-  resumenRow: {
+  cardLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: COLORS.muted,
+  },
+
+  // Card Saldo total
+  balanceCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 26,
+    padding: 22,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.borderSoft,
+  },
+  balanceAmount: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: COLORS.primary,
+    marginTop: 6,
+    marginBottom: 14,
+  },
+  balanceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 8,
   },
-  resumenItem: {
-    flex: 1,
-    marginRight: 8,
-  },
-  resumenLabel: {
-    fontSize: 12,
-    color: COLORS.muted,
-    marginBottom: 4,
-  },
-  resumenValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  positivo: {
-    color: COLORS.positive,
-  },
-  negativo: {
-    color: COLORS.negative,
-  },
-  barWrapper: {
-    marginTop: 16,
-  },
-  barBackground: {
-    flexDirection: 'row',
-    height: 10,
-    borderRadius: 999,
-    overflow: 'hidden',
-    backgroundColor: '#c2cec9',
-  },
-  barIngresos: {
-    backgroundColor: COLORS.positive,
-  },
-  barGastos: {
-    backgroundColor: COLORS.negative,
-  },
-  barLegendRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    marginTop: 8,
-  },
-  legendItem: {
+  balancePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 16,
+    backgroundColor: '#eef2f7',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    marginRight: 8,
   },
-  legendDot: {
+  pillDot: {
     width: 8,
     height: 8,
     borderRadius: 999,
     marginRight: 6,
   },
-  legendText: {
-    fontSize: 11,
-    color: COLORS.muted,
+  pillText: {
+    fontSize: 12,
+    color: COLORS.primary,
+    fontWeight: '500',
   },
+
+  // Presupuesto
+  budgetBarBackground: {
+    flexDirection: 'row',
+    height: 10,
+    borderRadius: 999,
+    overflow: 'hidden',
+    backgroundColor: '#e5e7eb',
+    marginBottom: 12,
+  },
+  budgetSegmentIncome: {
+    backgroundColor: COLORS.income,
+  },
+  budgetSegmentExpense: {
+    backgroundColor: COLORS.expense,
+  },
+  budgetRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  budgetItem: {
+    flex: 1,
+    marginRight: 12,
+  },
+  budgetLabel: {
+    fontSize: 12,
+    color: COLORS.muted,
+    marginBottom: 2,
+  },
+  budgetValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+
+  // API / texto
   jsonText: {
     fontFamily: Platform.select({
       ios: 'Courier',
@@ -348,7 +390,7 @@ const styles = StyleSheet.create({
       default: 'Courier',
     }),
     fontSize: 12,
-    color: COLORS.text,
+    color: COLORS.primary,
     marginTop: 8,
   },
   muted: {
@@ -356,35 +398,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   errorText: {
-    color: COLORS.negative,
+    color: '#b91c1c',
+    marginHorizontal: 20,
     marginBottom: 8,
-    paddingHorizontal: 4,
   },
+
   rowBetween: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   smallLink: {
-    color: COLORS.accent,
+    color: COLORS.primary,
     fontSize: 14,
-    fontWeight: '500',
   },
-  movimientoCard: {
-    marginTop: 12,
-    padding: 12,
-    borderRadius: 16,
-    backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  movHeaderRow: {
+
+  // Movimientos
+  movimientoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    paddingVertical: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#e5e7eb',
+  },
+  movLeft: {
+    flex: 1,
+    paddingRight: 8,
   },
   movDescripcion: {
-    color: COLORS.text,
+    color: COLORS.primary,
     fontWeight: '600',
     fontSize: 14,
   },
@@ -396,16 +439,79 @@ const styles = StyleSheet.create({
   movCategoria: {
     fontSize: 12,
     color: COLORS.muted,
-    marginTop: 6,
+    marginTop: 2,
   },
   movMonto: {
     fontSize: 16,
     fontWeight: '700',
   },
   montoPositivo: {
-    color: COLORS.positive,
+    color: COLORS.income,
   },
   montoNegativo: {
-    color: COLORS.negative,
+    color: COLORS.expense,
+  },
+
+  // Bottom nav (mock)
+  bottomNav: {
+    height: 70,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.borderSoft,
+    backgroundColor: COLORS.card,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingBottom: 10,
+  },
+  navItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  navItemCenter: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  navIcon: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: COLORS.muted,
+    marginBottom: 2,
+  },
+  navIconActive: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    marginBottom: 2,
+    backgroundColor: 'rgba(11, 26, 59, 0.08)',
+  },
+  navLabel: {
+    fontSize: 11,
+    color: COLORS.muted,
+  },
+  navLabelActive: {
+    fontSize: 11,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  navPlusCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  navPlusText: {
+    color: COLORS.card,
+    fontSize: 24,
+    fontWeight: '700',
+    marginTop: -2,
   },
 });
