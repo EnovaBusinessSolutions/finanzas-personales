@@ -172,10 +172,10 @@ export default function Dashboard() {
         style={styles.container}
         contentContainerStyle={styles.content}
       >
-        {/* HEADER tipo "FinaFlow" */}
+        {/* HEADER – quitamos texto "FinaFlow" y dejamos sólo iconos */}
         <View style={styles.headerRow}>
           <Ionicons name="close" size={22} color={COLORS.muted} />
-          <Text style={styles.appTitle}>FinaFlow</Text>
+          <View style={{ width: 26 }} />
           <Ionicons
             name="person-circle-outline"
             size={26}
@@ -183,13 +183,28 @@ export default function Dashboard() {
           />
         </View>
 
-        {/* PATRIMONIO NETO (círculo grande) */}
+        {/* CARD SALDO TOTAL (antes Patrimonio neto) */}
         <View style={styles.netWorthCard}>
-          <View style={styles.netWorthCircleOuter}>
-            <View style={styles.netWorthCircleInner}>
-              <Text style={styles.netWorthLabel}>Patrimonio neto</Text>
-              <Text style={styles.netWorthValue}>
-                {formatCurrency(resumen.saldo)}
+          <Text style={styles.balanceLabel}>Saldo total</Text>
+          <Text style={styles.balanceValue}>
+            {formatCurrency(resumen.saldo)}
+          </Text>
+
+          <View style={styles.chipsRow}>
+            <View style={styles.badge}>
+              <View
+                style={[styles.badgeDot, { backgroundColor: COLORS.income }]}
+              />
+              <Text style={styles.badgeText}>
+                Ingresos {formatCurrency(resumen.ingresos)}
+              </Text>
+            </View>
+            <View style={styles.badge}>
+              <View
+                style={[styles.badgeDot, { backgroundColor: COLORS.expense }]}
+              />
+              <Text style={styles.badgeText}>
+                Gastos {formatCurrency(Math.abs(resumen.gastos))}
               </Text>
             </View>
           </View>
@@ -416,7 +431,7 @@ export default function Dashboard() {
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Bottom Nav (igual que tenías, sólo usando iconos válidos) */}
+      {/* Bottom Nav */}
       <View style={styles.navBarContainer}>
         <View style={styles.navBar}>
           {/* Inicio */}
@@ -560,46 +575,48 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 16,
   },
-  appTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
 
-  // Patrimonio neto
+  // Card Saldo total (antes patrimonio neto)
   netWorthCard: {
     backgroundColor: COLORS.card,
-    borderRadius: 24,
-    paddingVertical: 24,
-    alignItems: 'center',
-    marginBottom: 20,
+    borderRadius: 28,
+    padding: 20,
+    marginBottom: 16,
   },
-  netWorthCircleOuter: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    borderWidth: 12,
-    borderColor: '#e5e7eb',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  netWorthCircleInner: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: COLORS.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  netWorthLabel: {
-    fontSize: 13,
+  balanceLabel: {
+    fontSize: 18,
     color: COLORS.muted,
-    marginBottom: 4,
+    marginBottom: 8,
   },
-  netWorthValue: {
-    fontSize: 22,
+  balanceValue: {
+    fontSize: 34,
     fontWeight: '800',
     color: COLORS.text,
+    marginBottom: 16,
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e5edf0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  badgeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 999,
+    marginRight: 6,
+  },
+  badgeText: {
+    fontSize: 13,
+    color: COLORS.text,
+    fontWeight: '600',
   },
 
   // Top tabs
