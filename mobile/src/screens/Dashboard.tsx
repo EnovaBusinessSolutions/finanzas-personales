@@ -11,10 +11,7 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getDashboardDemo } from '../services/api';
-
-// 👇 IMPORT CORRECTO DEL MENÚ
-import BottomMenu from '../components/BottomMenu';
-
+import BottomMenu from '../components/BottomMenu'; // 👈 menú separado
 
 // Tipos
 type Movimiento = {
@@ -134,6 +131,19 @@ export default function Dashboard() {
   const fracIngresos = resumen.ingresos / totalBar;
   const fracGastos = Math.abs(resumen.gastos) / totalBar;
 
+  // 👉 Meta de ahorro (mock por ahora)
+  const savingsGoalTotal = 20000; // meta objetivo
+  const savingsGoalCurrent = Math.max(resumen.saldo, 0); // lo que llevas ahorrado
+  const savingsGoalRemaining = Math.max(
+    savingsGoalTotal - savingsGoalCurrent,
+    0
+  );
+  const savingsGoalProgress =
+    savingsGoalTotal > 0
+      ? Math.min(savingsGoalCurrent / savingsGoalTotal, 1)
+      : 0;
+  const savingsGoalPercent = Math.round(savingsGoalProgress * 100);
+
   // 👉 Cargar dashboard (/dashboard-demo)
   async function loadDashboard() {
     try {
@@ -233,64 +243,127 @@ export default function Dashboard() {
           </TouchableOpacity>
         </View>
 
-        {/* BLOQUE PRINCIPAL Ingresos vs Gastos */}
-        <View style={styles.flowCard}>
-          <View style={styles.flowHeaderRow}>
-            <Text style={styles.flowTitle}>Ingresos vs gastos</Text>
-            <Text style={styles.flowAmount}>
-              {formatCurrency(resumen.ingresos - Math.abs(resumen.gastos))}
-            </Text>
-          </View>
+        {/* BLOQUE PRINCIPAL: condicional según pestaña */}
+        {activeTopTab === 'balance' ? (
+          // 🔹 Vista Ingresos vs Gastos
+          <View style={styles.flowCard}>
+            <View style={styles.flowHeaderRow}>
+              <Text style={styles.flowTitle}>Ingresos vs gastos</Text>
+              <Text style={styles.flowAmount}>
+                {formatCurrency(
+                  resumen.ingresos - Math.abs(resumen.gastos)
+                )}
+              </Text>
+            </View>
 
-          {/* Barra horizontal */}
-          <View style={styles.flowBarBackground}>
-            <View style={[styles.flowBarIngresos, { flex: fracIngresos }]} />
-            <View style={[styles.flowBarGastos, { flex: fracGastos }]} />
-          </View>
+            {/* Barra horizontal */}
+            <View style={styles.flowBarBackground}>
+              <View
+                style={[styles.flowBarIngresos, { flex: fracIngresos }]}
+              />
+              <View style={[styles.flowBarGastos, { flex: fracGastos }]} />
+            </View>
 
-          {/* Etiquetas ingresos / gastos */}
-          <View style={styles.flowBottomRow}>
-            <View style={styles.flowStat}>
+            {/* Etiquetas ingresos / gastos */}
+            <View style={styles.flowBottomRow}>
+              <View style={styles.flowStat}>
+                <View
+                  style={[
+                    styles.flowDot,
+                    { backgroundColor: COLORS.income },
+                  ]}
+                />
+                <View>
+                  <Text style={styles.flowStatLabel}>Ingresos</Text>
+                  <Text
+                    style={[
+                      styles.flowStatValue,
+                      { color: COLORS.income },
+                    ]}
+                  >
+                    {formatCurrency(resumen.ingresos)}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.flowStat}>
+                <View
+                  style={[
+                    styles.flowDot,
+                    { backgroundColor: COLORS.expense },
+                  ]}
+                />
+                <View>
+                  <Text style={styles.flowStatLabel}>Gastos</Text>
+                  <Text
+                    style={[
+                      styles.flowStatValue,
+                      { color: COLORS.expense },
+                    ]}
+                  >
+                    {formatCurrency(Math.abs(resumen.gastos))}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        ) : (
+          // 🔹 Vista Meta de ahorro
+          <View style={styles.savingsCard}>
+            <View style={styles.savingsHeaderRow}>
+              <Text style={styles.savingsTitle}>Meta de ahorro</Text>
+              <Text style={styles.savingsTotal}>
+                {formatCurrency(savingsGoalTotal)}
+              </Text>
+            </View>
+
+            {/* Barra de progreso */}
+            <View style={styles.savingsProgressBackground}>
               <View
                 style={[
-                  styles.flowDot,
-                  { backgroundColor: COLORS.income },
+                  styles.savingsProgressFill,
+                  { width: `${savingsGoalProgress * 100}%` },
                 ]}
               />
-              <View>
-                <Text style={styles.flowStatLabel}>Ingresos</Text>
+            </View>
+
+            <View style={styles.savingsBottomRow}>
+              <View style={styles.savingsColumn}>
+                <Text style={styles.savingsLabel}>Ahorrado</Text>
                 <Text
                   style={[
-                    styles.flowStatValue,
+                    styles.savingsValue,
                     { color: COLORS.income },
                   ]}
                 >
-                  {formatCurrency(resumen.ingresos)}
+                  {formatCurrency(savingsGoalCurrent)}
+                </Text>
+              </View>
+              <View style={styles.savingsColumn}>
+                <Text style={styles.savingsLabel}>Restante</Text>
+                <Text
+                  style={[
+                    styles.savingsValue,
+                    { color: COLORS.expense },
+                  ]}
+                >
+                  {formatCurrency(savingsGoalRemaining)}
+                </Text>
+              </View>
+              <View style={styles.savingsColumnRight}>
+                <Text style={styles.savingsLabel}>Progreso</Text>
+                <Text style={styles.savingsPercent}>
+                  {savingsGoalPercent}%
                 </Text>
               </View>
             </View>
 
-            <View style={styles.flowStat}>
-              <View
-                style={[
-                  styles.flowDot,
-                  { backgroundColor: COLORS.expense },
-                ]}
-              />
-              <View>
-                <Text style={styles.flowStatLabel}>Gastos</Text>
-                <Text
-                  style={[
-                    styles.flowStatValue,
-                    { color: COLORS.expense },
-                  ]}
-                >
-                  {formatCurrency(Math.abs(resumen.gastos))}
-                </Text>
-              </View>
-            </View>
+            <Text style={styles.savingsHint}>
+              Esta meta es solo un ejemplo. Pronto podrás crear tus propias
+              metas de ahorro.
+            </Text>
           </View>
-        </View>
+        )}
 
         {/* MIS CUENTAS */}
         <Text style={styles.sectionTitle}>Mis cuentas</Text>
@@ -557,6 +630,72 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: COLORS.text,
+  },
+
+  // Card Meta de ahorro
+  savingsCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 24,
+    padding: 18,
+    marginBottom: 20,
+  },
+  savingsHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  savingsTitle: {
+    fontSize: 15,
+    color: COLORS.muted,
+  },
+  savingsTotal: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  savingsProgressBackground: {
+    marginTop: 8,
+    marginBottom: 12,
+    height: 10,
+    borderRadius: 999,
+    backgroundColor: '#e5e7eb',
+    overflow: 'hidden',
+  },
+  savingsProgressFill: {
+    height: '100%',
+    backgroundColor: COLORS.income,
+    borderRadius: 999,
+  },
+  savingsBottomRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  savingsColumn: {
+    flex: 1,
+  },
+  savingsColumnRight: {
+    alignItems: 'flex-end',
+  },
+  savingsLabel: {
+    fontSize: 12,
+    color: COLORS.muted,
+    marginBottom: 2,
+  },
+  savingsValue: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  savingsPercent: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  savingsHint: {
+    marginTop: 10,
+    fontSize: 11,
+    color: COLORS.muted,
   },
 
   // Secciones
