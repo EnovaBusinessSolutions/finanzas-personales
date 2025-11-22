@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getDashboardDemo } from '../services/api';
+import BottomMenu from '..BottomMenu/components/BottomMenu'; // 👈 NUEVO
 
 // Tipos
 type Movimiento = {
@@ -395,126 +396,12 @@ export default function Dashboard() {
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Bottom Nav */}
-      <View style={styles.navBarContainer}>
-        <View style={styles.navBar}>
-          {/* Inicio */}
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => setActiveBottomTab('home')}
-          >
-            <Ionicons
-              name={
-                activeBottomTab === 'home' ? 'home' : 'home-outline'
-              }
-              size={22}
-              color={
-                activeBottomTab === 'home'
-                  ? COLORS.navIconActive
-                  : COLORS.navIconInactive
-              }
-            />
-            <Text
-              style={[
-                styles.navLabel,
-                activeBottomTab === 'home' && styles.navLabelActive,
-              ]}
-            >
-              Inicio
-            </Text>
-          </TouchableOpacity>
-
-          {/* Reportes */}
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => setActiveBottomTab('reports')}
-          >
-            <Ionicons
-              name={
-                activeBottomTab === 'reports'
-                  ? 'stats-chart'
-                  : 'stats-chart-outline'
-              }
-              size={22}
-              color={
-                activeBottomTab === 'reports'
-                  ? COLORS.navIconActive
-                  : COLORS.navIconInactive
-              }
-            />
-            <Text
-              style={[
-                styles.navLabel,
-                activeBottomTab === 'reports' && styles.navLabelActive,
-              ]}
-            >
-              Reportes
-            </Text>
-          </TouchableOpacity>
-
-          {/* Botón central (+) */}
-          <View style={styles.navPlusWrapper}>
-            <TouchableOpacity style={styles.navPlusCircle}>
-              <Ionicons name="add" size={30} color={COLORS.primary} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Metas */}
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => setActiveBottomTab('goals')}
-          >
-            <Ionicons
-              name={
-                activeBottomTab === 'goals' ? 'flag' : 'flag-outline'
-              }
-              size={22}
-              color={
-                activeBottomTab === 'goals'
-                  ? COLORS.navIconActive
-                  : COLORS.navIconInactive
-              }
-            />
-            <Text
-              style={[
-                styles.navLabel,
-                activeBottomTab === 'goals' && styles.navLabelActive,
-              ]}
-            >
-              Metas
-            </Text>
-          </TouchableOpacity>
-
-          {/* Ajustes */}
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => setActiveBottomTab('settings')}
-          >
-            <Ionicons
-              name={
-                activeBottomTab === 'settings'
-                  ? 'settings'
-                  : 'settings-outline'
-              }
-              size={22}
-              color={
-                activeBottomTab === 'settings'
-                  ? COLORS.navIconActive
-                  : COLORS.navIconInactive
-              }
-            />
-            <Text
-              style={[
-                styles.navLabel,
-                activeBottomTab === 'settings' &&
-                  styles.navLabelActive,
-              ]}
-            >
-              Ajustes
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      {/* 🔻 Menú separado en su propio componente */}
+      <BottomMenu
+        activeTab={activeBottomTab}
+        onTabChange={setActiveBottomTab}
+        colors={COLORS}
+      />
     </View>
   );
 }
@@ -761,32 +648,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  // API / texto genérico
+  // Utilidades
   rowBetween: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  apiChipButton: {
-    backgroundColor: COLORS.apiChipBg,
-    borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  apiChipText: {
-    color: COLORS.apiChipText,
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  apiJsonText: {
-    marginTop: 10,
-    fontFamily: Platform.select({
-      ios: 'Courier',
-      android: 'monospace',
-      default: 'Courier',
-    }),
-    fontSize: 12,
-    color: COLORS.text,
   },
   mutedText: {
     color: COLORS.muted,
@@ -837,56 +703,5 @@ const styles = StyleSheet.create({
   },
   movMontoNegativo: {
     color: COLORS.expense,
-  },
-
-  // Bottom nav
-  navBarContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  navBar: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-around',
-    backgroundColor: COLORS.navBg,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: Platform.OS === 'ios' ? 28 : 16,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  navLabel: {
-    fontSize: 11,
-    marginTop: 4,
-    color: COLORS.navLabelInactive,
-  },
-  navLabelActive: {
-    color: COLORS.navLabelActive,
-    fontWeight: '600',
-  },
-  navPlusWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -26,
-  },
-  navPlusCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: COLORS.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
   },
 });
