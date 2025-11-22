@@ -11,7 +11,10 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getDashboardDemo } from '../services/api';
-import BottomMenu from '..BottomMenu/components/BottomMenu'; // 👈 NUEVO
+
+// 👇 IMPORT CORRECTO DEL MENÚ
+import BottomMenu from '../components/BottomMenu';
+
 
 // Tipos
 type Movimiento = {
