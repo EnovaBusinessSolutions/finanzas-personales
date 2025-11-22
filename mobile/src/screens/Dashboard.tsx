@@ -172,7 +172,7 @@ export default function Dashboard() {
         style={styles.container}
         contentContainerStyle={styles.content}
       >
-        {/* HEADER – quitamos texto "FinaFlow" y dejamos sólo iconos */}
+        {/* HEADER – sólo iconos */}
         <View style={styles.headerRow}>
           <Ionicons name="close" size={22} color={COLORS.muted} />
           <View style={{ width: 26 }} />
@@ -183,7 +183,7 @@ export default function Dashboard() {
           />
         </View>
 
-        {/* CARD SALDO TOTAL (antes Patrimonio neto) */}
+        {/* CARD SALDO TOTAL */}
         <View style={styles.netWorthCard}>
           <Text style={styles.balanceLabel}>Saldo total</Text>
           <Text style={styles.balanceValue}>
@@ -246,7 +246,7 @@ export default function Dashboard() {
           </TouchableOpacity>
         </View>
 
-        {/* BLOQUE PRINCIPAL Ingresos vs Gastos (barra horizontal) */}
+        {/* BLOQUE PRINCIPAL Ingresos vs Gastos */}
         <View style={styles.flowCard}>
           <View style={styles.flowHeaderRow}>
             <Text style={styles.flowTitle}>Ingresos vs gastos</Text>
@@ -272,7 +272,12 @@ export default function Dashboard() {
               />
               <View>
                 <Text style={styles.flowStatLabel}>Ingresos</Text>
-                <Text style={styles.flowStatValue}>
+                <Text
+                  style={[
+                    styles.flowStatValue,
+                    { color: COLORS.income }, // 👈 cambio de color
+                  ]}
+                >
                   {formatCurrency(resumen.ingresos)}
                 </Text>
               </View>
@@ -287,7 +292,12 @@ export default function Dashboard() {
               />
               <View>
                 <Text style={styles.flowStatLabel}>Gastos</Text>
-                <Text style={styles.flowStatValue}>
+                <Text
+                  style={[
+                    styles.flowStatValue,
+                    { color: COLORS.expense }, // 👈 cambio de color
+                  ]}
+                >
                   {formatCurrency(Math.abs(resumen.gastos))}
                 </Text>
               </View>
@@ -349,7 +359,7 @@ export default function Dashboard() {
           ))}
         </View>
 
-        {/* RESPUESTA API (para debug / pruebas) */}
+        {/* RESPUESTA API */}
         <View style={styles.card}>
           <View style={styles.rowBetween}>
             <Text style={styles.cardTitle}>Respuesta de la API</Text>
@@ -381,7 +391,7 @@ export default function Dashboard() {
         {/* ERRORES */}
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        {/* ÚLTIMOS MOVIMIENTOS (con datos reales del backend) */}
+        {/* ÚLTIMOS MOVIMIENTOS */}
         <View style={styles.card}>
           <View style={styles.rowBetween}>
             <Text style={styles.cardTitle}>Últimos movimientos</Text>
@@ -576,7 +586,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  // Card Saldo total (antes patrimonio neto)
+  // Card Saldo total
   netWorthCard: {
     backgroundColor: COLORS.card,
     borderRadius: 28,
