@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Platform,
   Modal,
+  Alert, // 👈 NUEVO
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -39,6 +40,12 @@ export default function BottomMenu({
   colors,
 }: BottomMenuProps) {
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+
+  // 👇 Handler genérico para las opciones del submenú
+  const handleMenuPress = (label: string) => {
+    setIsAddMenuOpen(false);
+    Alert.alert('Próximamente', `La herramienta "${label}" aún está en proceso.`);
+  };
 
   return (
     <>
@@ -222,7 +229,10 @@ export default function BottomMenu({
             </View>
 
             <View style={styles.addMenuGrid}>
-              <TouchableOpacity style={styles.addMenuItem}>
+              <TouchableOpacity
+                style={styles.addMenuItem}
+                onPress={() => handleMenuPress('Meta financiera')}
+              >
                 <View
                   style={[
                     styles.addMenuItemIcon,
@@ -245,7 +255,10 @@ export default function BottomMenu({
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.addMenuItem}>
+              <TouchableOpacity
+                style={styles.addMenuItem}
+                onPress={() => handleMenuPress('Inversión')}
+              >
                 <View
                   style={[
                     styles.addMenuItemIcon,
@@ -268,7 +281,10 @@ export default function BottomMenu({
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.addMenuItem}>
+              <TouchableOpacity
+                style={styles.addMenuItem}
+                onPress={() => handleMenuPress('Finanza 3')}
+              >
                 <View
                   style={[
                     styles.addMenuItemIcon,
@@ -291,7 +307,10 @@ export default function BottomMenu({
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.addMenuItem}>
+              <TouchableOpacity
+                style={styles.addMenuItem}
+                onPress={() => handleMenuPress('Finanza 4')}
+              >
                 <View
                   style={[
                     styles.addMenuItemIcon,
@@ -314,7 +333,10 @@ export default function BottomMenu({
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.addMenuItem}>
+              <TouchableOpacity
+                style={styles.addMenuItem}
+                onPress={() => handleMenuPress('Finanza 5')}
+              >
                 <View
                   style={[
                     styles.addMenuItemIcon,
