@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { testApi, getDashboardDemo } from '../services/api';
+import { getDashboardDemo } from '../services/api';
 
 // Tipos
 type Movimiento = {
@@ -114,9 +114,7 @@ type BottomTabKey = 'home' | 'reports' | 'goals' | 'settings';
 type TopTabKey = 'balance' | 'savings';
 
 export default function Dashboard() {
-  const [health, setHealth] = useState<any | null>(null);
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
-  const [loadingHealth, setLoadingHealth] = useState(false);
   const [loadingDashboard, setLoadingDashboard] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -131,21 +129,6 @@ export default function Dashboard() {
   const totalBar = resumen.ingresos + Math.abs(resumen.gastos) || 1;
   const fracIngresos = resumen.ingresos / totalBar;
   const fracGastos = Math.abs(resumen.gastos) / totalBar;
-
-  // 👉 Botón "Probar API" (usa /health)
-  async function handleProbarApi() {
-    try {
-      setLoadingHealth(true);
-      setError(null);
-      const data = await testApi();
-      setHealth(data);
-    } catch (e: any) {
-      console.error(e);
-      setError(e?.message ?? 'Error probando API');
-    } finally {
-      setLoadingHealth(false);
-    }
-  }
 
   // 👉 Cargar dashboard (/dashboard-demo)
   async function loadDashboard() {
@@ -172,7 +155,7 @@ export default function Dashboard() {
         style={styles.container}
         contentContainerStyle={styles.content}
       >
-        {/* HEADER – sólo iconos */}
+        {/* HEADER – sólo iconos arriba */}
         <View style={styles.headerRow}>
           <Ionicons name="close" size={22} color={COLORS.muted} />
           <View style={{ width: 26 }} />
@@ -275,7 +258,7 @@ export default function Dashboard() {
                 <Text
                   style={[
                     styles.flowStatValue,
-                    { color: COLORS.income }, // 👈 cambio de color
+                    { color: COLORS.income },
                   ]}
                 >
                   {formatCurrency(resumen.ingresos)}
@@ -295,7 +278,7 @@ export default function Dashboard() {
                 <Text
                   style={[
                     styles.flowStatValue,
-                    { color: COLORS.expense }, // 👈 cambio de color
+                    { color: COLORS.expense },
                   ]}
                 >
                   {formatCurrency(Math.abs(resumen.gastos))}
@@ -359,39 +342,10 @@ export default function Dashboard() {
           ))}
         </View>
 
-        {/* RESPUESTA API */}
-        <View style={styles.card}>
-          <View style={styles.rowBetween}>
-            <Text style={styles.cardTitle}>Respuesta de la API</Text>
-            <TouchableOpacity
-              onPress={handleProbarApi}
-              style={styles.apiChipButton}
-            >
-              {loadingHealth ? (
-                <ActivityIndicator size="small" color={COLORS.apiChipText} />
-              ) : (
-                <Text style={styles.apiChipText}>Probar API</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-
-          {!loadingHealth && health && (
-            <Text style={styles.apiJsonText}>
-              {JSON.stringify(health, null, 2)}
-            </Text>
-          )}
-
-          {!loadingHealth && !health && (
-            <Text style={styles.mutedText}>
-              Pulsa "Probar API" para ver la respuesta.
-            </Text>
-          )}
-        </View>
-
         {/* ERRORES */}
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        {/* ÚLTIMOS MOVIMIENTOS */}
+        {/* ÚLTIMOS MOVIMIENTOS (datos reales del backend) */}
         <View style={styles.card}>
           <View style={styles.rowBetween}>
             <Text style={styles.cardTitle}>Últimos movimientos</Text>
@@ -793,7 +747,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
 
-  // Card genérica (API, movimientos)
+  // Card genérica (movimientos)
   card: {
     backgroundColor: COLORS.card,
     borderRadius: 24,
@@ -807,7 +761,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  // API
+  // API / texto genérico
   rowBetween: {
     flexDirection: 'row',
     justifyContent: 'space-between',
