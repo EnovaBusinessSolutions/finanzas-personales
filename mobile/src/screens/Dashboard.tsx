@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getDashboardDemo } from '../services/api';
@@ -184,7 +185,7 @@ export default function Dashboard() {
 
   // qué segmentos están abiertos (dropdown)
   const [openSegments, setOpenSegments] = useState<Record<string, boolean>>({
-    ropa: true, // solo ropa abierta al inicio para que no se vea todo amontonado
+    ropa: true, // solo ropa abierta al inicio
   });
 
   const resumen = dashboard?.resumen ?? { ingresos: 0, gastos: 0, saldo: 0 };
@@ -441,25 +442,31 @@ export default function Dashboard() {
         {/* ERRORES */}
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        {/* 🔹 NUEVO BLOQUE: RESUMEN DE MOVIMIENTOS */}
+        {/* 🔹 BLOQUE: RESUMEN DE MOVIMIENTOS */}
         <View style={styles.card}>
-          {/* Título + recargar */}
+          {/* Título + recargar con ícono */}
           <View style={styles.rowBetween}>
             <Text style={styles.cardTitle}>Resumen de movimientos</Text>
-            <TouchableOpacity onPress={loadDashboard}>
-              <Text style={styles.reloadText}>
-                {loadingDashboard ? 'Cargando…' : 'Recargar'}
-              </Text>
-            </TouchableOpacity>
+            {loadingDashboard ? (
+              <ActivityIndicator size="small" color={COLORS.primary} />
+            ) : (
+              <TouchableOpacity
+                onPress={loadDashboard}
+                style={styles.reloadIconButton}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons name="refresh" size={20} color={COLORS.primary} />
+              </TouchableOpacity>
+            )}
           </View>
 
-          {/* Tabs de periodo (más finitas y con más aire) */}
+          {/* Tabs de periodo */}
           <View style={styles.periodTabsRow}>
             {[
               { key: 'hoy', label: 'Hoy' },
               { key: 'semana', label: 'Semana' },
               { key: 'mes', label: 'Mes' },
-              { key: 'personalizado', label: 'Personalizado' },
+              { key: 'personalizado', label: '📅' }, // emoji calendario
             ].map((tab) => (
               <TouchableOpacity
                 key={tab.key}
@@ -733,7 +740,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   savingsBarFill: {
-    flex: 0.65, // 65% de la barra
+    flex: 0.65,
     height: '100%',
     backgroundColor: COLORS.income,
   },
@@ -859,9 +866,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 8,
   },
-  reloadText: {
-    color: COLORS.primary,
-    fontWeight: '600',
+
+  reloadIconButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#edf1f5',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // Tabs de periodo
