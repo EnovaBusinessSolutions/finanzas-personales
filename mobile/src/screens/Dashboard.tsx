@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  Platform,
   ActivityIndicator,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -460,32 +459,44 @@ export default function Dashboard() {
             )}
           </View>
 
-          {/* Tabs de periodo */}
+          {/* Tabs de periodo (con icono de calendario minimalista) */}
           <View style={styles.periodTabsRow}>
             {[
               { key: 'hoy', label: 'Hoy' },
               { key: 'semana', label: 'Semana' },
               { key: 'mes', label: 'Mes' },
-              { key: 'personalizado', label: '📅' }, // emoji calendario
-            ].map((tab) => (
-              <TouchableOpacity
-                key={tab.key}
-                style={[
-                  styles.periodTab,
-                  activePeriod === tab.key && styles.periodTabActive,
-                ]}
-                onPress={() => setActivePeriod(tab.key as PeriodKey)}
-              >
-                <Text
+              { key: 'personalizado', icon: 'calendar-outline' },
+            ].map((tab) => {
+              const isActive = activePeriod === (tab.key as PeriodKey);
+              return (
+                <TouchableOpacity
+                  key={tab.key}
                   style={[
-                    styles.periodTabText,
-                    activePeriod === tab.key && styles.periodTabTextActive,
+                    styles.periodTab,
+                    isActive && styles.periodTabActive,
                   ]}
+                  onPress={() => setActivePeriod(tab.key as PeriodKey)}
                 >
-                  {tab.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  {tab.icon ? (
+                    <Ionicons
+                      name={tab.icon as any}
+                      size={18}
+                      style={styles.periodTabIcon}
+                      color={isActive ? COLORS.card : COLORS.muted}
+                    />
+                  ) : (
+                    <Text
+                      style={[
+                        styles.periodTabText,
+                        isActive && styles.periodTabTextActive,
+                      ]}
+                    >
+                      {tab.label}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
           {/* Barra de búsqueda */}
@@ -900,6 +911,9 @@ const styles = StyleSheet.create({
   periodTabTextActive: {
     color: COLORS.card,
     fontWeight: '600',
+  },
+  periodTabIcon: {
+    marginTop: 1,
   },
 
   // Search bar
