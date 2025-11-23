@@ -11,6 +11,7 @@ import {
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getDashboardDemo } from '../services/api';
 import BottomMenu from '../components/BottomMenu'; // 👈 Menú separado
+import AppHeader from '../components/AppHeader'; // 👈 Nuevo header tipo NU
 
 // Tipos
 type Movimiento = {
@@ -187,6 +188,9 @@ export default function Dashboard() {
     ropa: true, // solo ropa abierta al inicio
   });
 
+  // ocultar/mostrar saldo tipo NU
+  const [isBalanceHidden, setIsBalanceHidden] = useState(false);
+
   const resumen = dashboard?.resumen ?? { ingresos: 0, gastos: 0, saldo: 0 };
   const movimientos = dashboard?.movimientos ?? [];
 
@@ -230,22 +234,19 @@ export default function Dashboard() {
         style={styles.container}
         contentContainerStyle={styles.content}
       >
-        {/* HEADER – sólo iconos arriba */}
-        <View style={styles.headerRow}>
-          <Ionicons name="close" size={22} color={COLORS.muted} />
-          <View style={{ width: 26 }} />
-          <Ionicons
-            name="person-circle-outline"
-            size={26}
-            color={COLORS.primary}
-          />
-        </View>
+        {/* HEADER tipo NU (campana + ojo + ? + perfil+) */}
+        <AppHeader
+          isBalanceHidden={isBalanceHidden}
+          onToggleBalanceHidden={() =>
+            setIsBalanceHidden((prev) => !prev)
+          }
+        />
 
         {/* CARD SALDO TOTAL */}
         <View style={styles.netWorthCard}>
           <Text style={styles.balanceLabel}>Saldo total</Text>
           <Text style={styles.balanceValue}>
-            {formatCurrency(resumen.saldo)}
+            {isBalanceHidden ? '•••••••' : formatCurrency(resumen.saldo)}
           </Text>
 
           {/* Mensaje breve en lugar de chips de ingresos/gastos */}
@@ -625,14 +626,6 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 24,
-  },
-
-  // Header
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
   },
 
   // Card Saldo total
