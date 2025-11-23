@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  ActivityIndicator,
   StyleSheet,
   Platform,
 } from 'react-native';
@@ -45,6 +44,18 @@ type AlertCard = {
   titulo: string;
   subtitulo: string;
   tone: 'info' | 'warning';
+};
+
+type BottomTabKey = 'home' | 'reports' | 'goals' | 'settings';
+type TopTabKey = 'balance' | 'savings';
+type PeriodKey = 'hoy' | 'semana' | 'mes' | 'personalizado';
+
+type MovementSegment = {
+  id: string;
+  titulo: string;
+  icon: string;
+  total: number;
+  items: { id: string; comercio: string; monto: number }[];
 };
 
 // Paleta basada en tu diseño
@@ -101,6 +112,54 @@ const MOCK_ALERTS: AlertCard[] = [
   },
 ];
 
+// Segmentos demo para "Resumen de movimientos"
+const MOVEMENT_SEGMENTS: MovementSegment[] = [
+  {
+    id: 'ropa',
+    titulo: 'Ropa',
+    icon: 'shirt-outline',
+    total: 1250,
+    items: [
+      { id: 'zara', comercio: 'Zara', monto: 500 },
+      { id: 'bershka', comercio: 'Bershka', monto: 350 },
+      { id: 'pullbear', comercio: 'Pull&Bear', monto: 400 },
+    ],
+  },
+  {
+    id: 'comida',
+    titulo: 'Comida / Cafés',
+    icon: 'fast-food-outline',
+    total: 430,
+    items: [
+      { id: 'starbucks', comercio: 'Starbucks', monto: 180 },
+      { id: 'mcdonalds', comercio: "McDonald's", monto: 150 },
+      { id: 'local', comercio: 'Café local', monto: 100 },
+    ],
+  },
+  {
+    id: 'personal',
+    titulo: 'Gasto personal',
+    icon: 'person-outline',
+    total: 280,
+    items: [
+      { id: 'netflix', comercio: 'Netflix', monto: 150 },
+      { id: 'spotify', comercio: 'Spotify', monto: 80 },
+      { id: 'gym', comercio: 'Gimnasio', monto: 50 },
+    ],
+  },
+  {
+    id: 'hormiga',
+    titulo: 'Gasto hormiga',
+    icon: 'cash-outline',
+    total: 160,
+    items: [
+      { id: 'tiendita', comercio: 'Tiendita', monto: 40 },
+      { id: 'antojito', comercio: 'Antojito', monto: 60 },
+      { id: 'snacks', comercio: 'Snacks varios', monto: 60 },
+    ],
+  },
+];
+
 // Helper para formatear cantidades
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -111,10 +170,6 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-type BottomTabKey = 'home' | 'reports' | 'goals' | 'settings';
-type TopTabKey = 'balance' | 'savings';
-type PeriodKey = 'hoy' | 'semana' | 'mes' | 'personalizado';
-
 export default function Dashboard() {
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [loadingDashboard, setLoadingDashboard] = useState(false);
@@ -124,11 +179,13 @@ export default function Dashboard() {
     useState<BottomTabKey>('home');
   const [activeTopTab, setActiveTopTab] = useState<TopTabKey>('balance');
 
-  // nuevo: periodo seleccionado en “Resumen de movimientos”
-  const [activePeriod, setActivePeriod] =
-    useState<PeriodKey>('mes');
-  // nuevo: dropdown de movimientos abierto/cerrado
-  const [showMovements, setShowMovements] = useState(true);
+  // periodo seleccionado en “Resumen de movimientos”
+  const [activePeriod, setActivePeriod] = useState<PeriodKey>('mes');
+
+  // qué segmentos están abiertos (dropdown)
+  const [openSegments, setOpenSegments] = useState<Record<string, boolean>>({
+    ropa: true, // solo ropa abierta al inicio para que no se vea todo amontonado
+  });
 
   const resumen = dashboard?.resumen ?? { ingresos: 0, gastos: 0, saldo: 0 };
   const movimientos = dashboard?.movimientos ?? [];
@@ -156,6 +213,10 @@ export default function Dashboard() {
   useEffect(() => {
     loadDashboard();
   }, []);
+
+  const toggleSegment = (id: string) => {
+    setOpenSegments((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
     <View style={styles.screen}>
@@ -298,7 +359,7 @@ export default function Dashboard() {
           </View>
         )}
 
-        {/* Si quisieras otra UI cuando esté "Metas de ahorro", aquí iría. */}
+        {/* UI para pestaña "Metas de ahorro" */}
         {activeTopTab === 'savings' && (
           <View style={styles.flowCard}>
             <Text style={styles.flowTitle}>Progreso de tu meta de ahorro</Text>
@@ -392,7 +453,7 @@ export default function Dashboard() {
             </TouchableOpacity>
           </View>
 
-          {/* Tabs de periodo */}
+          {/* Tabs de periodo (más finitas y con más aire) */}
           <View style={styles.periodTabsRow}>
             {[
               { key: 'hoy', label: 'Hoy' },
@@ -420,7 +481,7 @@ export default function Dashboard() {
             ))}
           </View>
 
-          {/* Barra de búsqueda (solo visual por ahora) */}
+          {/* Barra de búsqueda */}
           <View style={styles.searchBar}>
             <Ionicons
               name="search-outline"
@@ -433,91 +494,70 @@ export default function Dashboard() {
             </Text>
           </View>
 
-          {/* Resumen de una categoría (inspirado en la imagen que mandaste) */}
-          <View style={styles.categorySummaryRow}>
-            <View style={styles.categoryLeft}>
-              <View style={styles.categoryIconCircle}>
-                <Ionicons
-                  name="shirt-outline"
-                  size={22}
-                  color={COLORS.card}
-                />
-              </View>
-              <View>
-                <Text style={styles.categoryTitle}>Ropa</Text>
-                <Text style={styles.categorySubtitle}>
-                  $1,250 total este mes
-                </Text>
-              </View>
-            </View>
-
-            {/* mini gráfica circular estilizada */}
-            <View style={styles.categoryPie}>
-              <View style={styles.categoryPieLarge} />
-              <View style={styles.categoryPieSmall} />
-            </View>
-          </View>
-
-          {/* Dropdown de movimientos */}
-          <TouchableOpacity
-            style={styles.dropdownHeader}
-            onPress={() => setShowMovements((prev) => !prev)}
-          >
-            <Text style={styles.dropdownLabel}>Movimientos</Text>
-            <Ionicons
-              name={showMovements ? 'chevron-up' : 'chevron-down'}
-              size={18}
-              color={COLORS.primary}
-            />
-          </TouchableOpacity>
-
-          {showMovements && (
-            <View style={{ marginTop: 4 }}>
-              {loadingDashboard && (
-                <ActivityIndicator
-                  style={{ marginTop: 8 }}
-                  color={COLORS.primary}
-                />
-              )}
-
-              {!loadingDashboard &&
-                movimientos.map((mov) => (
-                  <View key={mov.id} style={styles.movItem}>
-                    <View style={styles.movRow}>
-                      {/* “Avatar” con inicial del comercio */}
-                      <View style={styles.movAvatar}>
-                        <Text style={styles.movAvatarText}>
-                          {mov.descripcion.charAt(0).toUpperCase()}
-                        </Text>
-                      </View>
-
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.movDescripcion}>
-                          {mov.descripcion}
-                        </Text>
-                        <Text style={styles.movCategoria}>
-                          {mov.categoria}
-                        </Text>
-                        <Text style={styles.movFecha}>{mov.fecha}</Text>
-                      </View>
-
-                      <Text
-                        style={[
-                          styles.movMonto,
-                          mov.monto >= 0
-                            ? styles.movMontoPositivo
-                            : styles.movMontoNegativo,
-                        ]}
-                      >
-                        {mov.monto >= 0
-                          ? `+${formatCurrency(mov.monto)}`
-                          : `-${formatCurrency(Math.abs(mov.monto))}`}
+          {/* Segmentos con dropdown (Ropa, Comida, etc.) */}
+          {MOVEMENT_SEGMENTS.map((segment) => {
+            const isOpen = !!openSegments[segment.id];
+            return (
+              <View key={segment.id} style={styles.segmentCard}>
+                <TouchableOpacity
+                  style={styles.segmentHeader}
+                  onPress={() => toggleSegment(segment.id)}
+                >
+                  <View style={styles.segmentHeaderLeft}>
+                    <View style={styles.segmentIconCircle}>
+                      <Ionicons
+                        name={segment.icon as any}
+                        size={22}
+                        color={COLORS.card}
+                      />
+                    </View>
+                    <View>
+                      <Text style={styles.segmentTitle}>
+                        {segment.titulo}
+                      </Text>
+                      <Text style={styles.segmentSubtitle}>
+                        {formatCurrency(segment.total)} total este mes
                       </Text>
                     </View>
                   </View>
-                ))}
-            </View>
-          )}
+                  <Ionicons
+                    name={isOpen ? 'chevron-up' : 'chevron-down'}
+                    size={18}
+                    color={COLORS.primary}
+                  />
+                </TouchableOpacity>
+
+                {isOpen && (
+                  <View style={styles.segmentMovements}>
+                    {segment.items.map((item) => (
+                      <View key={item.id} style={styles.movItem}>
+                        <View style={styles.movRow}>
+                          <View style={styles.movAvatar}>
+                            <Text style={styles.movAvatarText}>
+                              {item.comercio.charAt(0).toUpperCase()}
+                            </Text>
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.movDescripcion}>
+                              {item.comercio}
+                            </Text>
+                          </View>
+                          <Text
+                            style={[
+                              styles.movMonto,
+                              styles.movMontoNegativo,
+                            ]}
+                          >
+                            -{formatCurrency(item.monto)}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            );
+          })}
         </View>
 
         {/* Espacio para que el scroll no quede detrás del nav */}
@@ -801,7 +841,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: COLORS.text,
-    marginBottom: 10,
+    marginBottom: 12,
   },
 
   // Utilidades
@@ -824,14 +864,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Tabs de periodo (Hoy / Semana / Mes / Personalizado)
+  // Tabs de periodo
   periodTabsRow: {
     flexDirection: 'row',
-    marginTop: 12,
-    marginBottom: 10,
-    backgroundColor: '#edf1f5',
-    borderRadius: 999,
-    padding: 4,
+    marginTop: 14,
+    marginBottom: 14,
   },
   periodTab: {
     flex: 1,
@@ -861,25 +898,32 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    marginBottom: 14,
+    marginBottom: 16,
   },
   searchBarPlaceholder: {
     fontSize: 13,
     color: COLORS.muted,
   },
 
-  // Resumen de categoría + gráfica
-  categorySummaryRow: {
+  // Segmentos de categoría
+  segmentCard: {
+    borderRadius: 18,
+    backgroundColor: '#f5f7fa',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 10,
+  },
+  segmentHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
   },
-  categoryLeft: {
+  segmentHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
-  categoryIconCircle: {
+  segmentIconCircle: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -888,57 +932,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 10,
   },
-  categoryTitle: {
+  segmentTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: COLORS.text,
   },
-  categorySubtitle: {
+  segmentSubtitle: {
     fontSize: 13,
     color: COLORS.muted,
     marginTop: 2,
   },
-  categoryPie: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  categoryPieLarge: {
-    position: 'absolute',
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: '#1f2b4f',
-  },
-  categoryPieSmall: {
-    position: 'absolute',
-    right: 4,
-    top: 6,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#9ca9c8',
+  segmentMovements: {
+    marginTop: 6,
   },
 
-  // Dropdown movimientos
-  dropdownHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  dropdownLabel: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-
-  // Movimientos
+  // Movimientos dentro de segmentos
   movItem: {
     paddingVertical: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
