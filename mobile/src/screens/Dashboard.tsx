@@ -195,6 +195,12 @@ export default function Dashboard() {
   const fracIngresos = resumen.ingresos / totalBar;
   const fracGastos = Math.abs(resumen.gastos) / totalBar;
 
+  // Datos de meta de ahorro (demo)
+  const savingsGoal = 12500;
+  const savingsSaved = 8000;
+  const savingsProgress =
+    savingsGoal > 0 ? Math.min(savingsSaved / savingsGoal, 1) : 0;
+
   // 👉 Cargar dashboard (/dashboard-demo)
   async function loadDashboard() {
     try {
@@ -242,24 +248,11 @@ export default function Dashboard() {
             {formatCurrency(resumen.saldo)}
           </Text>
 
-          <View style={styles.chipsRow}>
-            <View style={styles.badge}>
-              <View
-                style={[styles.badgeDot, { backgroundColor: COLORS.income }]}
-              />
-              <Text style={styles.badgeText}>
-                Ingresos {formatCurrency(resumen.ingresos)}
-              </Text>
-            </View>
-            <View style={styles.badge}>
-              <View
-                style={[styles.badgeDot, { backgroundColor: COLORS.expense }]}
-              />
-              <Text style={styles.badgeText}>
-                Gastos {formatCurrency(Math.abs(resumen.gastos))}
-              </Text>
-            </View>
-          </View>
+          {/* Mensaje breve en lugar de chips de ingresos/gastos */}
+          <Text style={styles.balanceHelper}>
+            Aquí verás el saldo disponible de la cuenta o tarjeta que
+            vinculaste.
+          </Text>
         </View>
 
         {/* TABS superiores: Ingresos vs Gastos / Metas de Ahorro */}
@@ -369,8 +362,14 @@ export default function Dashboard() {
               </Text>
             </View>
 
+            {/* Barra que refleja el % ahorrado */}
             <View style={styles.savingsBarBg}>
-              <View style={styles.savingsBarFill} />
+              <View
+                style={[
+                  styles.savingsBarFill,
+                  { width: `${savingsProgress * 100}%` },
+                ]}
+              />
             </View>
 
             <View style={styles.savingsRow}>
@@ -383,7 +382,9 @@ export default function Dashboard() {
                 />
                 <View>
                   <Text style={styles.savingsLabel}>Meta mensual</Text>
-                  <Text style={styles.savingsValueGoal}>$12,500.00</Text>
+                  <Text style={styles.savingsValueGoal}>
+                    {formatCurrency(savingsGoal)}
+                  </Text>
                 </View>
               </View>
 
@@ -396,7 +397,9 @@ export default function Dashboard() {
                 />
                 <View>
                   <Text style={styles.savingsLabel}>Ahorro acumulado</Text>
-                  <Text style={styles.savingsValueSaved}>$8,000.00</Text>
+                  <Text style={styles.savingsValueSaved}>
+                    {formatCurrency(savingsSaved)}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -648,8 +651,14 @@ const styles = StyleSheet.create({
     fontSize: 34,
     fontWeight: '800',
     color: COLORS.text,
-    marginBottom: 16,
+    marginBottom: 8,
   },
+  balanceHelper: {
+    fontSize: 13,
+    color: COLORS.muted,
+  },
+
+  // (chips styles se quedan por si los reutilizas en otro lado)
   chipsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -783,9 +792,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   savingsBarFill: {
-    flex: 0.65,
     height: '100%',
     backgroundColor: COLORS.income, // verde
+    borderRadius: 999,
   },
   savingsRow: {
     flexDirection: 'row',
