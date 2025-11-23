@@ -183,11 +183,6 @@ export default function Dashboard() {
   // periodo seleccionado en “Resumen de movimientos”
   const [activePeriod, setActivePeriod] = useState<PeriodKey>('mes');
 
-  // qué segmentos están abiertos (dropdown)
-  const [openSegments, setOpenSegments] = useState<Record<string, boolean>>({
-    ropa: true, // solo ropa abierta al inicio
-  });
-
   // ocultar/mostrar saldo tipo NU
   const [isBalanceHidden, setIsBalanceHidden] = useState(false);
 
@@ -223,10 +218,6 @@ export default function Dashboard() {
   useEffect(() => {
     loadDashboard();
   }, []);
-
-  const toggleSegment = (id: string) => {
-    setOpenSegments((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
   return (
     <View style={styles.screen}>
@@ -300,7 +291,9 @@ export default function Dashboard() {
               <View style={styles.flowHeaderRow}>
                 <Text style={styles.flowTitle}>Ingresos vs gastos</Text>
                 <Text style={styles.flowAmount}>
-                  {formatCurrency(resumen.ingresos - Math.abs(resumen.gastos))}
+                  {formatCurrency(
+                    resumen.ingresos - Math.abs(resumen.gastos),
+                  )}
                 </Text>
               </View>
 
@@ -401,7 +394,9 @@ export default function Dashboard() {
                     ]}
                   />
                   <View>
-                    <Text style={styles.savingsLabel}>Ahorro acumulado</Text>
+                    <Text style={styles.savingsLabel}>
+                      Ahorro acumulado
+                    </Text>
                     <Text style={styles.savingsValueSaved}>
                       {formatCurrency(savingsSaved)}
                     </Text>
@@ -504,7 +499,9 @@ export default function Dashboard() {
                       styles.periodTab,
                       isActive && styles.periodTabActive,
                     ]}
-                    onPress={() => setActivePeriod(tab.key as PeriodKey)}
+                    onPress={() =>
+                      setActivePeriod(tab.key as PeriodKey)
+                    }
                   >
                     {tab.icon ? (
                       <Ionicons
@@ -541,70 +538,30 @@ export default function Dashboard() {
               </Text>
             </View>
 
-            {/* Segmentos con dropdown (Ropa, Comida, etc.) */}
-            {MOVEMENT_SEGMENTS.map((segment) => {
-              const isOpen = !!openSegments[segment.id];
-              return (
-                <View key={segment.id} style={styles.segmentCard}>
-                  <TouchableOpacity
-                    style={styles.segmentHeader}
-                    onPress={() => toggleSegment(segment.id)}
-                  >
-                    <View style={styles.segmentHeaderLeft}>
-                      <View style={styles.segmentIconCircle}>
-                        <Ionicons
-                          name={segment.icon as any}
-                          size={22}
-                          color={COLORS.card}
-                        />
-                      </View>
-                      <View>
-                        <Text style={styles.segmentTitle}>
-                          {segment.titulo}
-                        </Text>
-                        <Text style={styles.segmentSubtitle}>
-                          {formatCurrency(segment.total)} total este mes
-                        </Text>
-                      </View>
+            {/* Segmentos SIN dropdown, solo card estática */}
+            {MOVEMENT_SEGMENTS.map((segment) => (
+              <View key={segment.id} style={styles.segmentCard}>
+                <View style={styles.segmentHeader}>
+                  <View style={styles.segmentHeaderLeft}>
+                    <View style={styles.segmentIconCircle}>
+                      <Ionicons
+                        name={segment.icon as any}
+                        size={22}
+                        color={COLORS.card}
+                      />
                     </View>
-                    <Ionicons
-                      name={isOpen ? 'chevron-up' : 'chevron-down'}
-                      size={18}
-                      color={COLORS.primary}
-                    />
-                  </TouchableOpacity>
-
-                  {isOpen && (
-                    <View style={styles.segmentMovements}>
-                      {segment.items.map((item) => (
-                        <View key={item.id} style={styles.movItem}>
-                          <View style={styles.movRow}>
-                            <View style={styles.movAvatar}>
-                              <Text style={styles.movAvatarText}>
-                                {item.comercio.charAt(0).toUpperCase()}
-                              </Text>
-                            </View>
-                            <View style={{ flex: 1 }}>
-                              <Text style={styles.movDescripcion}>
-                                {item.comercio}
-                              </Text>
-                            </View>
-                            <Text
-                              style={[
-                                styles.movMonto,
-                                styles.movMontoNegativo,
-                              ]}
-                            >
-                              -{formatCurrency(item.monto)}
-                            </Text>
-                          </View>
-                        </View>
-                      ))}
+                    <View>
+                      <Text style={styles.segmentTitle}>
+                        {segment.titulo}
+                      </Text>
+                      <Text style={styles.segmentSubtitle}>
+                        {formatCurrency(segment.total)} total este mes
+                      </Text>
                     </View>
-                  )}
+                  </View>
                 </View>
-              );
-            })}
+              </View>
+            ))}
           </View>
 
           {/* Espacio para que el scroll no quede detrás del nav */}
@@ -1033,7 +990,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
 
-  // Movimientos dentro de segmentos
+  // Movimientos dentro de segmentos (por si los quieres usar después)
   movItem: {
     paddingVertical: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
