@@ -362,35 +362,42 @@ export default function Dashboard() {
         {/* UI para pestaña "Metas de ahorro" */}
         {activeTopTab === 'savings' && (
           <View style={styles.flowCard}>
-            {/* Header con título + montos alineados */}
-            <View style={styles.savingsHeaderRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.savingsTitle}>Meta de ahorro</Text>
-                <Text style={styles.savingsSubtitle}>
-                  Progreso de tu meta mensual
-                </Text>
-              </View>
-
-              <View style={styles.savingsRightBlock}>
-                <Text style={styles.savingsMainAmount}>$8,000.00</Text>
-                <Text style={styles.savingsSubAmount}>de $12,500.00</Text>
-              </View>
+            <View style={styles.savingsHeader}>
+              <Text style={styles.savingsTitle}>Meta de ahorro</Text>
+              <Text style={styles.savingsSubtitle}>
+                Progreso de tu meta mensual
+              </Text>
             </View>
 
-            {/* Barra de progreso */}
             <View style={styles.savingsBarBg}>
               <View style={styles.savingsBarFill} />
             </View>
 
-            {/* Stats inferiores */}
-            <View style={styles.savingsStatsRow}>
+            <View style={styles.savingsRow}>
               <View style={styles.savingsStat}>
-                <Text style={styles.savingsLabel}>Meta mensual</Text>
-                <Text style={styles.savingsValue}>$12,500.00</Text>
+                <View
+                  style={[
+                    styles.savingsDot,
+                    { backgroundColor: '#2563eb' }, // azul para meta
+                  ]}
+                />
+                <View>
+                  <Text style={styles.savingsLabel}>Meta mensual</Text>
+                  <Text style={styles.savingsValueGoal}>$12,500.00</Text>
+                </View>
               </View>
+
               <View style={styles.savingsStat}>
-                <Text style={styles.savingsLabel}>Ahorro acumulado</Text>
-                <Text style={styles.savingsValue}>$8,000.00</Text>
+                <View
+                  style={[
+                    styles.savingsDot,
+                    { backgroundColor: COLORS.income }, // verde para ahorro
+                  ]}
+                />
+                <View>
+                  <Text style={styles.savingsLabel}>Ahorro acumulado</Text>
+                  <Text style={styles.savingsValueSaved}>$8,000.00</Text>
+                </View>
               </View>
             </View>
           </View>
@@ -754,32 +761,16 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
 
-  // Savings (para pestaña "Metas de ahorro")
-  savingsHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 14,
+  // Savings (pestaña "Metas de ahorro")
+  savingsHeader: {
+    marginBottom: 10,
   },
   savingsTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     color: COLORS.text,
   },
   savingsSubtitle: {
-    fontSize: 13,
-    color: COLORS.muted,
-    marginTop: 2,
-  },
-  savingsRightBlock: {
-    alignItems: 'flex-end',
-  },
-  savingsMainAmount: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  savingsSubAmount: {
     fontSize: 13,
     color: COLORS.muted,
     marginTop: 2,
@@ -789,30 +780,41 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: '#e5e7eb',
     overflow: 'hidden',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   savingsBarFill: {
-    flex: 0.64, // 64% de progreso
+    flex: 0.65,
     height: '100%',
-    backgroundColor: COLORS.income,
+    backgroundColor: COLORS.income, // verde
   },
-  savingsStatsRow: {
+  savingsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 4,
   },
   savingsStat: {
-    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  savingsDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 8,
   },
   savingsLabel: {
     fontSize: 12,
     color: COLORS.muted,
-    marginBottom: 2,
   },
-  savingsValue: {
+  savingsValueGoal: {
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.text,
+  },
+  savingsValueSaved: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.income,
   },
 
   // Secciones
