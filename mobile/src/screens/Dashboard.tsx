@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getDashboardDemo } from '../services/api';
-import BottomMenu from '../components/BottomMenu'; // 👈 Menú separado
-import AppHeader from '../components/AppHeader'; // 👈 Nuevo header tipo NU
+import BottomMenu from '../components/BottomMenu'; // 👈 Menú inferior
+import AppHeader from '../components/AppHeader'; // 👈 Header tipo NU
 
 // Tipos
 type Movimiento = {
@@ -192,7 +192,7 @@ export default function Dashboard() {
   const [isBalanceHidden, setIsBalanceHidden] = useState(false);
 
   const resumen = dashboard?.resumen ?? { ingresos: 0, gastos: 0, saldo: 0 };
-  const movimientos = dashboard?.movimientos ?? [];
+  const movimientos = dashboard?.movimientos ?? []; // por si después lo usas
 
   // Para barra ingresos vs gastos
   const totalBar = resumen.ingresos + Math.abs(resumen.gastos) || 1;
@@ -242,367 +242,374 @@ export default function Dashboard() {
           }
         />
 
-        {/* CARD SALDO TOTAL */}
-        <View style={styles.netWorthCard}>
-          <Text style={styles.balanceLabel}>Saldo total</Text>
-          <Text style={styles.balanceValue}>
-            {isBalanceHidden ? '•••••••' : formatCurrency(resumen.saldo)}
-          </Text>
-
-          {/* Mensaje breve en lugar de chips de ingresos/gastos */}
-          <Text style={styles.balanceHelper}>
-            Aquí verás el saldo disponible de la cuenta o tarjeta que
-            vinculaste.
-          </Text>
-        </View>
-
-        {/* TABS superiores: Ingresos vs Gastos / Metas de Ahorro */}
-        <View style={styles.topTabsRow}>
-          <TouchableOpacity
-            style={[
-              styles.topTab,
-              activeTopTab === 'balance' && styles.topTabActive,
-            ]}
-            onPress={() => setActiveTopTab('balance')}
-          >
-            <Text
-              style={[
-                styles.topTabText,
-                activeTopTab === 'balance' && styles.topTabTextActive,
-              ]}
-            >
-              Ingresos vs. gastos
+        {/* Contenido principal con padding lateral */}
+        <View style={styles.innerContent}>
+          {/* CARD SALDO TOTAL */}
+          <View style={styles.netWorthCard}>
+            <Text style={styles.balanceLabel}>Saldo total</Text>
+            <Text style={styles.balanceValue}>
+              {isBalanceHidden ? '•••••••' : formatCurrency(resumen.saldo)}
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.topTab,
-              activeTopTab === 'savings' && styles.topTabActive,
-            ]}
-            onPress={() => setActiveTopTab('savings')}
-          >
-            <Text
-              style={[
-                styles.topTabText,
-                activeTopTab === 'savings' && styles.topTabTextActive,
-              ]}
-            >
-              Metas de ahorro
+
+            {/* Mensaje breve en lugar de chips de ingresos/gastos */}
+            <Text style={styles.balanceHelper}>
+              Aquí verás el saldo disponible de la cuenta o tarjeta que
+              vinculaste.
             </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* BLOQUE PRINCIPAL Ingresos vs Gastos */}
-        {activeTopTab === 'balance' && (
-          <View style={styles.flowCard}>
-            <View style={styles.flowHeaderRow}>
-              <Text style={styles.flowTitle}>Ingresos vs gastos</Text>
-              <Text style={styles.flowAmount}>
-                {formatCurrency(resumen.ingresos - Math.abs(resumen.gastos))}
-              </Text>
-            </View>
-
-            {/* Barra horizontal */}
-            <View style={styles.flowBarBackground}>
-              <View style={[styles.flowBarIngresos, { flex: fracIngresos }]} />
-              <View style={[styles.flowBarGastos, { flex: fracGastos }]} />
-            </View>
-
-            {/* Etiquetas ingresos / gastos */}
-            <View style={styles.flowBottomRow}>
-              <View style={styles.flowStat}>
-                <View
-                  style={[
-                    styles.flowDot,
-                    { backgroundColor: COLORS.income },
-                  ]}
-                />
-                <View>
-                  <Text style={styles.flowStatLabel}>Ingresos</Text>
-                  <Text
-                    style={[
-                      styles.flowStatValue,
-                      { color: COLORS.income },
-                    ]}
-                  >
-                    {formatCurrency(resumen.ingresos)}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.flowStat}>
-                <View
-                  style={[
-                    styles.flowDot,
-                    { backgroundColor: COLORS.expense },
-                  ]}
-                />
-                <View>
-                  <Text style={styles.flowStatLabel}>Gastos</Text>
-                  <Text
-                    style={[
-                      styles.flowStatValue,
-                      { color: COLORS.expense },
-                    ]}
-                  >
-                    {formatCurrency(Math.abs(resumen.gastos))}
-                  </Text>
-                </View>
-              </View>
-            </View>
           </View>
-        )}
 
-        {/* UI para pestaña "Metas de ahorro" */}
-        {activeTopTab === 'savings' && (
-          <View style={styles.flowCard}>
-            <View style={styles.savingsHeader}>
-              <Text style={styles.savingsTitle}>Meta de ahorro</Text>
-              <Text style={styles.savingsSubtitle}>
-                Progreso de tu meta mensual
-              </Text>
-            </View>
-
-            {/* Barra que refleja el % ahorrado */}
-            <View style={styles.savingsBarBg}>
-              <View
+          {/* TABS superiores: Ingresos vs Gastos / Metas de Ahorro */}
+          <View style={styles.topTabsRow}>
+            <TouchableOpacity
+              style={[
+                styles.topTab,
+                activeTopTab === 'balance' && styles.topTabActive,
+              ]}
+              onPress={() => setActiveTopTab('balance')}
+            >
+              <Text
                 style={[
-                  styles.savingsBarFill,
-                  { width: `${savingsProgress * 100}%` },
+                  styles.topTabText,
+                  activeTopTab === 'balance' && styles.topTabTextActive,
                 ]}
-              />
-            </View>
-
-            <View style={styles.savingsRow}>
-              <View style={styles.savingsStat}>
-                <View
-                  style={[
-                    styles.savingsDot,
-                    { backgroundColor: '#2563eb' }, // azul para meta
-                  ]}
-                />
-                <View>
-                  <Text style={styles.savingsLabel}>Meta mensual</Text>
-                  <Text style={styles.savingsValueGoal}>
-                    {formatCurrency(savingsGoal)}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.savingsStat}>
-                <View
-                  style={[
-                    styles.savingsDot,
-                    { backgroundColor: COLORS.income }, // verde para ahorro
-                  ]}
-                />
-                <View>
-                  <Text style={styles.savingsLabel}>Ahorro acumulado</Text>
-                  <Text style={styles.savingsValueSaved}>
-                    {formatCurrency(savingsSaved)}
-                  </Text>
-                </View>
-              </View>
-            </View>
+              >
+                Ingresos vs. gastos
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.topTab,
+                activeTopTab === 'savings' && styles.topTabActive,
+              ]}
+              onPress={() => setActiveTopTab('savings')}
+            >
+              <Text
+                style={[
+                  styles.topTabText,
+                  activeTopTab === 'savings' && styles.topTabTextActive,
+                ]}
+              >
+                Metas de ahorro
+              </Text>
+            </TouchableOpacity>
           </View>
-        )}
 
-        {/* MIS CUENTAS */}
-        <Text style={styles.sectionTitle}>Mis cuentas</Text>
-        {MOCK_ACCOUNTS.map((acc) => (
-          <View key={acc.id} style={styles.accountCard}>
-            <View style={styles.accountLeft}>
-              <View style={styles.accountIconCircle}>
-                <Ionicons
-                  name={acc.tipo === 'bank' ? 'card-outline' : 'wallet-outline'}
-                  size={20}
-                  color={COLORS.card}
-                />
-              </View>
-              <View>
-                <Text style={styles.accountName}>{acc.nombre}</Text>
-                <Text style={styles.accountSubtitle}>
-                  {acc.subtitulo}
+          {/* BLOQUE PRINCIPAL Ingresos vs Gastos */}
+          {activeTopTab === 'balance' && (
+            <View style={styles.flowCard}>
+              <View style={styles.flowHeaderRow}>
+                <Text style={styles.flowTitle}>Ingresos vs gastos</Text>
+                <Text style={styles.flowAmount}>
+                  {formatCurrency(resumen.ingresos - Math.abs(resumen.gastos))}
                 </Text>
               </View>
-            </View>
-            <Text style={styles.accountBalance}>
-              {formatCurrency(acc.saldo)}
-            </Text>
-          </View>
-        ))}
 
-        {/* ALERTAS PERSONALIZADAS */}
-        <Text style={styles.sectionTitle}>Alertas personalizadas</Text>
-        <View style={styles.alertsRow}>
-          {MOCK_ALERTS.map((alert) => (
-            <View
-              key={alert.id}
-              style={[
-                styles.alertCard,
-                alert.tone === 'warning' && styles.alertCardWarning,
-              ]}
-            >
-              <View style={styles.alertHeaderRow}>
-                <Ionicons
-                  name={
-                    alert.tone === 'warning'
-                      ? 'warning-outline'
-                      : 'notifications-outline'
-                  }
-                  size={18}
-                  color={COLORS.primary}
-                  style={{ marginRight: 6 }}
+              {/* Barra horizontal */}
+              <View style={styles.flowBarBackground}>
+                <View
+                  style={[styles.flowBarIngresos, { flex: fracIngresos }]}
                 />
-                <Text style={styles.alertTitle}>{alert.titulo}</Text>
+                <View style={[styles.flowBarGastos, { flex: fracGastos }]} />
               </View>
-              <Text style={styles.alertSubtitle}>{alert.subtitulo}</Text>
-            </View>
-          ))}
-        </View>
 
-        {/* ERRORES */}
-        {error && <Text style={styles.errorText}>{error}</Text>}
-
-        {/* 🔹 BLOQUE: RESUMEN DE MOVIMIENTOS */}
-        <View style={styles.card}>
-          {/* Título + recargar con ícono */}
-          <View style={styles.rowBetween}>
-            <Text style={styles.cardTitle}>Resumen de movimientos</Text>
-            {loadingDashboard ? (
-              <ActivityIndicator size="small" color={COLORS.primary} />
-            ) : (
-              <TouchableOpacity
-                onPress={loadDashboard}
-                style={styles.reloadIconButton}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <Ionicons name="refresh" size={20} color={COLORS.primary} />
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {/* Tabs de periodo (con icono de calendario minimalista) */}
-          <View style={styles.periodTabsRow}>
-            {[
-              { key: 'hoy', label: 'Hoy' },
-              { key: 'semana', label: 'Semana' },
-              { key: 'mes', label: 'Mes' },
-              { key: 'personalizado', icon: 'calendar-outline' },
-            ].map((tab) => {
-              const isActive = activePeriod === (tab.key as PeriodKey);
-              return (
-                <TouchableOpacity
-                  key={tab.key}
-                  style={[
-                    styles.periodTab,
-                    isActive && styles.periodTabActive,
-                  ]}
-                  onPress={() => setActivePeriod(tab.key as PeriodKey)}
-                >
-                  {tab.icon ? (
-                    <Ionicons
-                      name={tab.icon as any}
-                      size={18}
-                      style={styles.periodTabIcon}
-                      color={isActive ? COLORS.card : COLORS.muted}
-                    />
-                  ) : (
+              {/* Etiquetas ingresos / gastos */}
+              <View style={styles.flowBottomRow}>
+                <View style={styles.flowStat}>
+                  <View
+                    style={[
+                      styles.flowDot,
+                      { backgroundColor: COLORS.income },
+                    ]}
+                  />
+                  <View>
+                    <Text style={styles.flowStatLabel}>Ingresos</Text>
                     <Text
                       style={[
-                        styles.periodTabText,
-                        isActive && styles.periodTabTextActive,
+                        styles.flowStatValue,
+                        { color: COLORS.income },
                       ]}
                     >
-                      {tab.label}
+                      {formatCurrency(resumen.ingresos)}
                     </Text>
-                  )}
+                  </View>
+                </View>
+
+                <View style={styles.flowStat}>
+                  <View
+                    style={[
+                      styles.flowDot,
+                      { backgroundColor: COLORS.expense },
+                    ]}
+                  />
+                  <View>
+                    <Text style={styles.flowStatLabel}>Gastos</Text>
+                    <Text
+                      style={[
+                        styles.flowStatValue,
+                        { color: COLORS.expense },
+                      ]}
+                    >
+                      {formatCurrency(Math.abs(resumen.gastos))}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {/* UI para pestaña "Metas de ahorro" */}
+          {activeTopTab === 'savings' && (
+            <View style={styles.flowCard}>
+              <View style={styles.savingsHeader}>
+                <Text style={styles.savingsTitle}>Meta de ahorro</Text>
+                <Text style={styles.savingsSubtitle}>
+                  Progreso de tu meta mensual
+                </Text>
+              </View>
+
+              {/* Barra que refleja el % ahorrado */}
+              <View style={styles.savingsBarBg}>
+                <View
+                  style={[
+                    styles.savingsBarFill,
+                    { width: `${savingsProgress * 100}%` },
+                  ]}
+                />
+              </View>
+
+              <View style={styles.savingsRow}>
+                <View style={styles.savingsStat}>
+                  <View
+                    style={[
+                      styles.savingsDot,
+                      { backgroundColor: '#2563eb' }, // azul para meta
+                    ]}
+                  />
+                  <View>
+                    <Text style={styles.savingsLabel}>Meta mensual</Text>
+                    <Text style={styles.savingsValueGoal}>
+                      {formatCurrency(savingsGoal)}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.savingsStat}>
+                  <View
+                    style={[
+                      styles.savingsDot,
+                      { backgroundColor: COLORS.income }, // verde para ahorro
+                    ]}
+                  />
+                  <View>
+                    <Text style={styles.savingsLabel}>Ahorro acumulado</Text>
+                    <Text style={styles.savingsValueSaved}>
+                      {formatCurrency(savingsSaved)}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {/* MIS CUENTAS */}
+          <Text style={styles.sectionTitle}>Mis cuentas</Text>
+          {MOCK_ACCOUNTS.map((acc) => (
+            <View key={acc.id} style={styles.accountCard}>
+              <View style={styles.accountLeft}>
+                <View style={styles.accountIconCircle}>
+                  <Ionicons
+                    name={
+                      acc.tipo === 'bank' ? 'card-outline' : 'wallet-outline'
+                    }
+                    size={20}
+                    color={COLORS.card}
+                  />
+                </View>
+                <View>
+                  <Text style={styles.accountName}>{acc.nombre}</Text>
+                  <Text style={styles.accountSubtitle}>
+                    {acc.subtitulo}
+                  </Text>
+                </View>
+              </View>
+              <Text style={styles.accountBalance}>
+                {formatCurrency(acc.saldo)}
+              </Text>
+            </View>
+          ))}
+
+          {/* ALERTAS PERSONALIZADAS */}
+          <Text style={styles.sectionTitle}>Alertas personalizadas</Text>
+          <View style={styles.alertsRow}>
+            {MOCK_ALERTS.map((alert) => (
+              <View
+                key={alert.id}
+                style={[
+                  styles.alertCard,
+                  alert.tone === 'warning' && styles.alertCardWarning,
+                ]}
+              >
+                <View style={styles.alertHeaderRow}>
+                  <Ionicons
+                    name={
+                      alert.tone === 'warning'
+                        ? 'warning-outline'
+                        : 'notifications-outline'
+                    }
+                    size={18}
+                    color={COLORS.primary}
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text style={styles.alertTitle}>{alert.titulo}</Text>
+                </View>
+                <Text style={styles.alertSubtitle}>{alert.subtitulo}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* ERRORES */}
+          {error && <Text style={styles.errorText}>{error}</Text>}
+
+          {/* 🔹 BLOQUE: RESUMEN DE MOVIMIENTOS */}
+          <View style={styles.card}>
+            {/* Título + recargar con ícono */}
+            <View style={styles.rowBetween}>
+              <Text style={styles.cardTitle}>Resumen de movimientos</Text>
+              {loadingDashboard ? (
+                <ActivityIndicator size="small" color={COLORS.primary} />
+              ) : (
+                <TouchableOpacity
+                  onPress={loadDashboard}
+                  style={styles.reloadIconButton}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name="refresh" size={20} color={COLORS.primary} />
                 </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Tabs de periodo (con icono de calendario minimalista) */}
+            <View style={styles.periodTabsRow}>
+              {[
+                { key: 'hoy', label: 'Hoy' },
+                { key: 'semana', label: 'Semana' },
+                { key: 'mes', label: 'Mes' },
+                { key: 'personalizado', icon: 'calendar-outline' },
+              ].map((tab) => {
+                const isActive = activePeriod === (tab.key as PeriodKey);
+                return (
+                  <TouchableOpacity
+                    key={tab.key}
+                    style={[
+                      styles.periodTab,
+                      isActive && styles.periodTabActive,
+                    ]}
+                    onPress={() => setActivePeriod(tab.key as PeriodKey)}
+                  >
+                    {tab.icon ? (
+                      <Ionicons
+                        name={tab.icon as any}
+                        size={18}
+                        style={styles.periodTabIcon}
+                        color={isActive ? COLORS.card : COLORS.muted}
+                      />
+                    ) : (
+                      <Text
+                        style={[
+                          styles.periodTabText,
+                          isActive && styles.periodTabTextActive,
+                        ]}
+                      >
+                        {tab.label}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Barra de búsqueda */}
+            <View style={styles.searchBar}>
+              <Ionicons
+                name="search-outline"
+                size={16}
+                color={COLORS.muted}
+                style={{ marginRight: 6 }}
+              />
+              <Text style={styles.searchBarPlaceholder}>
+                Buscar por comercio o categoría
+              </Text>
+            </View>
+
+            {/* Segmentos con dropdown (Ropa, Comida, etc.) */}
+            {MOVEMENT_SEGMENTS.map((segment) => {
+              const isOpen = !!openSegments[segment.id];
+              return (
+                <View key={segment.id} style={styles.segmentCard}>
+                  <TouchableOpacity
+                    style={styles.segmentHeader}
+                    onPress={() => toggleSegment(segment.id)}
+                  >
+                    <View style={styles.segmentHeaderLeft}>
+                      <View style={styles.segmentIconCircle}>
+                        <Ionicons
+                          name={segment.icon as any}
+                          size={22}
+                          color={COLORS.card}
+                        />
+                      </View>
+                      <View>
+                        <Text style={styles.segmentTitle}>
+                          {segment.titulo}
+                        </Text>
+                        <Text style={styles.segmentSubtitle}>
+                          {formatCurrency(segment.total)} total este mes
+                        </Text>
+                      </View>
+                    </View>
+                    <Ionicons
+                      name={isOpen ? 'chevron-up' : 'chevron-down'}
+                      size={18}
+                      color={COLORS.primary}
+                    />
+                  </TouchableOpacity>
+
+                  {isOpen && (
+                    <View style={styles.segmentMovements}>
+                      {segment.items.map((item) => (
+                        <View key={item.id} style={styles.movItem}>
+                          <View style={styles.movRow}>
+                            <View style={styles.movAvatar}>
+                              <Text style={styles.movAvatarText}>
+                                {item.comercio.charAt(0).toUpperCase()}
+                              </Text>
+                            </View>
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.movDescripcion}>
+                                {item.comercio}
+                              </Text>
+                            </View>
+                            <Text
+                              style={[
+                                styles.movMonto,
+                                styles.movMontoNegativo,
+                              ]}
+                            >
+                              -{formatCurrency(item.monto)}
+                            </Text>
+                          </View>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </View>
               );
             })}
           </View>
 
-          {/* Barra de búsqueda */}
-          <View style={styles.searchBar}>
-            <Ionicons
-              name="search-outline"
-              size={16}
-              color={COLORS.muted}
-              style={{ marginRight: 6 }}
-            />
-            <Text style={styles.searchBarPlaceholder}>
-              Buscar por comercio o categoría
-            </Text>
-          </View>
-
-          {/* Segmentos con dropdown (Ropa, Comida, etc.) */}
-          {MOVEMENT_SEGMENTS.map((segment) => {
-            const isOpen = !!openSegments[segment.id];
-            return (
-              <View key={segment.id} style={styles.segmentCard}>
-                <TouchableOpacity
-                  style={styles.segmentHeader}
-                  onPress={() => toggleSegment(segment.id)}
-                >
-                  <View style={styles.segmentHeaderLeft}>
-                    <View style={styles.segmentIconCircle}>
-                      <Ionicons
-                        name={segment.icon as any}
-                        size={22}
-                        color={COLORS.card}
-                      />
-                    </View>
-                    <View>
-                      <Text style={styles.segmentTitle}>
-                        {segment.titulo}
-                      </Text>
-                      <Text style={styles.segmentSubtitle}>
-                        {formatCurrency(segment.total)} total este mes
-                      </Text>
-                    </View>
-                  </View>
-                  <Ionicons
-                    name={isOpen ? 'chevron-up' : 'chevron-down'}
-                    size={18}
-                    color={COLORS.primary}
-                  />
-                </TouchableOpacity>
-
-                {isOpen && (
-                  <View style={styles.segmentMovements}>
-                    {segment.items.map((item) => (
-                      <View key={item.id} style={styles.movItem}>
-                        <View style={styles.movRow}>
-                          <View style={styles.movAvatar}>
-                            <Text style={styles.movAvatarText}>
-                              {item.comercio.charAt(0).toUpperCase()}
-                            </Text>
-                          </View>
-                          <View style={{ flex: 1 }}>
-                            <Text style={styles.movDescripcion}>
-                              {item.comercio}
-                            </Text>
-                          </View>
-                          <Text
-                            style={[
-                              styles.movMonto,
-                              styles.movMontoNegativo,
-                            ]}
-                          >
-                            -{formatCurrency(item.monto)}
-                          </Text>
-                        </View>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-            );
-          })}
+          {/* Espacio para que el scroll no quede detrás del nav */}
+          <View style={{ height: 120 }} />
         </View>
-
-        {/* Espacio para que el scroll no quede detrás del nav */}
-        <View style={{ height: 120 }} />
       </ScrollView>
 
       {/* Menú inferior reutilizable */}
@@ -624,8 +631,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
+    paddingHorizontal: 0, // el header maneja su propio padding
+    paddingTop: 0,
+  },
+  innerContent: {
     paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingTop: 0,
   },
 
   // Card Saldo total
@@ -633,6 +644,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     borderRadius: 28,
     padding: 20,
+    marginTop: 8, // baja un poco el bloque respecto al header
     marginBottom: 16,
   },
   balanceLabel: {

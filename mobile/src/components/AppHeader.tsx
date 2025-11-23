@@ -27,7 +27,7 @@ export default function AppHeader({
       >
         <Ionicons
           name="notifications-outline"
-          size={22}
+          size={26}
           color="#0b1a3b"
         />
       </TouchableOpacity>
@@ -41,7 +41,7 @@ export default function AppHeader({
         >
           <Ionicons
             name={isBalanceHidden ? 'eye-off-outline' : 'eye-outline'}
-            size={22}
+            size={26}
             color="#0b1a3b"
           />
         </TouchableOpacity>
@@ -53,7 +53,7 @@ export default function AppHeader({
         >
           <Ionicons
             name="help-circle-outline"
-            size={22}
+            size={26}
             color="#0b1a3b"
           />
         </TouchableOpacity>
@@ -65,7 +65,7 @@ export default function AppHeader({
         >
           <Ionicons
             name="person-add-outline"
-            size={22}
+            size={26}
             color="#0b1a3b"
           />
         </TouchableOpacity>
@@ -79,13 +79,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    paddingHorizontal: 20, // alineado con el contenido del dashboard
+    paddingTop: 18,
+    paddingBottom: 18,     // hace el header más alto
+    marginBottom: 24,      // empuja el bloque de "Saldo total" hacia abajo
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   iconButton: {
-    marginLeft: 14,
+    marginLeft: 18,
   },
 });
