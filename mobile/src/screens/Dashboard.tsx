@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getDashboardDemo } from '../services/api';
-import BottomMenu from '../components/BottomMenu'; // 👈 menú separado
+import BottomMenu from '../components/BottomMenu'; // 👈 Menú separado
 
 // Tipos
 type Movimiento = {
@@ -113,6 +113,7 @@ function formatCurrency(value: number): string {
 
 type BottomTabKey = 'home' | 'reports' | 'goals' | 'settings';
 type TopTabKey = 'balance' | 'savings';
+type PeriodKey = 'hoy' | 'semana' | 'mes' | 'personalizado';
 
 export default function Dashboard() {
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
@@ -123,6 +124,12 @@ export default function Dashboard() {
     useState<BottomTabKey>('home');
   const [activeTopTab, setActiveTopTab] = useState<TopTabKey>('balance');
 
+  // nuevo: periodo seleccionado en “Resumen de movimientos”
+  const [activePeriod, setActivePeriod] =
+    useState<PeriodKey>('mes');
+  // nuevo: dropdown de movimientos abierto/cerrado
+  const [showMovements, setShowMovements] = useState(true);
+
   const resumen = dashboard?.resumen ?? { ingresos: 0, gastos: 0, saldo: 0 };
   const movimientos = dashboard?.movimientos ?? [];
 
@@ -130,19 +137,6 @@ export default function Dashboard() {
   const totalBar = resumen.ingresos + Math.abs(resumen.gastos) || 1;
   const fracIngresos = resumen.ingresos / totalBar;
   const fracGastos = Math.abs(resumen.gastos) / totalBar;
-
-  // 👉 Meta de ahorro (mock por ahora)
-  const savingsGoalTotal = 20000; // meta objetivo
-  const savingsGoalCurrent = Math.max(resumen.saldo, 0); // lo que llevas ahorrado
-  const savingsGoalRemaining = Math.max(
-    savingsGoalTotal - savingsGoalCurrent,
-    0
-  );
-  const savingsGoalProgress =
-    savingsGoalTotal > 0
-      ? Math.min(savingsGoalCurrent / savingsGoalTotal, 1)
-      : 0;
-  const savingsGoalPercent = Math.round(savingsGoalProgress * 100);
 
   // 👉 Cargar dashboard (/dashboard-demo)
   async function loadDashboard() {
@@ -243,24 +237,19 @@ export default function Dashboard() {
           </TouchableOpacity>
         </View>
 
-        {/* BLOQUE PRINCIPAL: condicional según pestaña */}
-        {activeTopTab === 'balance' ? (
-          // 🔹 Vista Ingresos vs Gastos
+        {/* BLOQUE PRINCIPAL Ingresos vs Gastos */}
+        {activeTopTab === 'balance' && (
           <View style={styles.flowCard}>
             <View style={styles.flowHeaderRow}>
               <Text style={styles.flowTitle}>Ingresos vs gastos</Text>
               <Text style={styles.flowAmount}>
-                {formatCurrency(
-                  resumen.ingresos - Math.abs(resumen.gastos)
-                )}
+                {formatCurrency(resumen.ingresos - Math.abs(resumen.gastos))}
               </Text>
             </View>
 
             {/* Barra horizontal */}
             <View style={styles.flowBarBackground}>
-              <View
-                style={[styles.flowBarIngresos, { flex: fracIngresos }]}
-              />
+              <View style={[styles.flowBarIngresos, { flex: fracIngresos }]} />
               <View style={[styles.flowBarGastos, { flex: fracGastos }]} />
             </View>
 
@@ -307,61 +296,30 @@ export default function Dashboard() {
               </View>
             </View>
           </View>
-        ) : (
-          // 🔹 Vista Meta de ahorro
-          <View style={styles.savingsCard}>
-            <View style={styles.savingsHeaderRow}>
-              <Text style={styles.savingsTitle}>Meta de ahorro</Text>
-              <Text style={styles.savingsTotal}>
-                {formatCurrency(savingsGoalTotal)}
-              </Text>
-            </View>
+        )}
 
-            {/* Barra de progreso */}
-            <View style={styles.savingsProgressBackground}>
-              <View
-                style={[
-                  styles.savingsProgressFill,
-                  { width: `${savingsGoalProgress * 100}%` },
-                ]}
-              />
-            </View>
-
-            <View style={styles.savingsBottomRow}>
-              <View style={styles.savingsColumn}>
-                <Text style={styles.savingsLabel}>Ahorrado</Text>
-                <Text
-                  style={[
-                    styles.savingsValue,
-                    { color: COLORS.income },
-                  ]}
-                >
-                  {formatCurrency(savingsGoalCurrent)}
-                </Text>
-              </View>
-              <View style={styles.savingsColumn}>
-                <Text style={styles.savingsLabel}>Restante</Text>
-                <Text
-                  style={[
-                    styles.savingsValue,
-                    { color: COLORS.expense },
-                  ]}
-                >
-                  {formatCurrency(savingsGoalRemaining)}
-                </Text>
-              </View>
-              <View style={styles.savingsColumnRight}>
-                <Text style={styles.savingsLabel}>Progreso</Text>
-                <Text style={styles.savingsPercent}>
-                  {savingsGoalPercent}%
-                </Text>
-              </View>
-            </View>
-
-            <Text style={styles.savingsHint}>
-              Esta meta es solo un ejemplo. Pronto podrás crear tus propias
-              metas de ahorro.
+        {/* Si quisieras otra UI cuando esté "Metas de ahorro", aquí iría. */}
+        {activeTopTab === 'savings' && (
+          <View style={styles.flowCard}>
+            <Text style={styles.flowTitle}>Progreso de tu meta de ahorro</Text>
+            <Text style={[styles.flowAmount, { marginBottom: 12 }]}>
+              $8,000.00 de $12,500.00
             </Text>
+
+            <View style={styles.savingsBarBg}>
+              <View style={styles.savingsBarFill} />
+            </View>
+
+            <View style={styles.savingsRow}>
+              <View>
+                <Text style={styles.savingsLabel}>Meta mensual</Text>
+                <Text style={styles.savingsValue}>$12,500.00</Text>
+              </View>
+              <View>
+                <Text style={styles.savingsLabel}>Ahorro acumulado</Text>
+                <Text style={styles.savingsValue}>$8,000.00</Text>
+              </View>
+            </View>
           </View>
         )}
 
@@ -422,10 +380,11 @@ export default function Dashboard() {
         {/* ERRORES */}
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        {/* ÚLTIMOS MOVIMIENTOS (datos reales del backend) */}
+        {/* 🔹 NUEVO BLOQUE: RESUMEN DE MOVIMIENTOS */}
         <View style={styles.card}>
+          {/* Título + recargar */}
           <View style={styles.rowBetween}>
-            <Text style={styles.cardTitle}>Últimos movimientos</Text>
+            <Text style={styles.cardTitle}>Resumen de movimientos</Text>
             <TouchableOpacity onPress={loadDashboard}>
               <Text style={styles.reloadText}>
                 {loadingDashboard ? 'Cargando…' : 'Recargar'}
@@ -433,46 +392,139 @@ export default function Dashboard() {
             </TouchableOpacity>
           </View>
 
-          {loadingDashboard && (
-            <ActivityIndicator
-              style={{ marginTop: 8 }}
+          {/* Tabs de periodo */}
+          <View style={styles.periodTabsRow}>
+            {[
+              { key: 'hoy', label: 'Hoy' },
+              { key: 'semana', label: 'Semana' },
+              { key: 'mes', label: 'Mes' },
+              { key: 'personalizado', label: 'Personalizado' },
+            ].map((tab) => (
+              <TouchableOpacity
+                key={tab.key}
+                style={[
+                  styles.periodTab,
+                  activePeriod === tab.key && styles.periodTabActive,
+                ]}
+                onPress={() => setActivePeriod(tab.key as PeriodKey)}
+              >
+                <Text
+                  style={[
+                    styles.periodTabText,
+                    activePeriod === tab.key && styles.periodTabTextActive,
+                  ]}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Barra de búsqueda (solo visual por ahora) */}
+          <View style={styles.searchBar}>
+            <Ionicons
+              name="search-outline"
+              size={16}
+              color={COLORS.muted}
+              style={{ marginRight: 6 }}
+            />
+            <Text style={styles.searchBarPlaceholder}>
+              Buscar por comercio o categoría
+            </Text>
+          </View>
+
+          {/* Resumen de una categoría (inspirado en la imagen que mandaste) */}
+          <View style={styles.categorySummaryRow}>
+            <View style={styles.categoryLeft}>
+              <View style={styles.categoryIconCircle}>
+                <Ionicons
+                  name="shirt-outline"
+                  size={22}
+                  color={COLORS.card}
+                />
+              </View>
+              <View>
+                <Text style={styles.categoryTitle}>Ropa</Text>
+                <Text style={styles.categorySubtitle}>
+                  $1,250 total este mes
+                </Text>
+              </View>
+            </View>
+
+            {/* mini gráfica circular estilizada */}
+            <View style={styles.categoryPie}>
+              <View style={styles.categoryPieLarge} />
+              <View style={styles.categoryPieSmall} />
+            </View>
+          </View>
+
+          {/* Dropdown de movimientos */}
+          <TouchableOpacity
+            style={styles.dropdownHeader}
+            onPress={() => setShowMovements((prev) => !prev)}
+          >
+            <Text style={styles.dropdownLabel}>Movimientos</Text>
+            <Ionicons
+              name={showMovements ? 'chevron-up' : 'chevron-down'}
+              size={18}
               color={COLORS.primary}
             />
-          )}
+          </TouchableOpacity>
 
-          {!loadingDashboard &&
-            movimientos.map((mov) => (
-              <View key={mov.id} style={styles.movItem}>
-                <View style={styles.movHeaderRow}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.movDescripcion}>
-                      {mov.descripcion}
-                    </Text>
-                    <Text style={styles.movFecha}>{mov.fecha}</Text>
+          {showMovements && (
+            <View style={{ marginTop: 4 }}>
+              {loadingDashboard && (
+                <ActivityIndicator
+                  style={{ marginTop: 8 }}
+                  color={COLORS.primary}
+                />
+              )}
+
+              {!loadingDashboard &&
+                movimientos.map((mov) => (
+                  <View key={mov.id} style={styles.movItem}>
+                    <View style={styles.movRow}>
+                      {/* “Avatar” con inicial del comercio */}
+                      <View style={styles.movAvatar}>
+                        <Text style={styles.movAvatarText}>
+                          {mov.descripcion.charAt(0).toUpperCase()}
+                        </Text>
+                      </View>
+
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.movDescripcion}>
+                          {mov.descripcion}
+                        </Text>
+                        <Text style={styles.movCategoria}>
+                          {mov.categoria}
+                        </Text>
+                        <Text style={styles.movFecha}>{mov.fecha}</Text>
+                      </View>
+
+                      <Text
+                        style={[
+                          styles.movMonto,
+                          mov.monto >= 0
+                            ? styles.movMontoPositivo
+                            : styles.movMontoNegativo,
+                        ]}
+                      >
+                        {mov.monto >= 0
+                          ? `+${formatCurrency(mov.monto)}`
+                          : `-${formatCurrency(Math.abs(mov.monto))}`}
+                      </Text>
+                    </View>
                   </View>
-                  <Text
-                    style={[
-                      styles.movMonto,
-                      mov.monto >= 0
-                        ? styles.movMontoPositivo
-                        : styles.movMontoNegativo,
-                    ]}
-                  >
-                    {mov.monto >= 0
-                      ? `+${formatCurrency(mov.monto)}`
-                      : `-${formatCurrency(Math.abs(mov.monto))}`}
-                  </Text>
-                </View>
-                <Text style={styles.movCategoria}>{mov.categoria}</Text>
-              </View>
-            ))}
+                ))}
+            </View>
+          )}
         </View>
 
         {/* Espacio para que el scroll no quede detrás del nav */}
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* 🔻 Menú separado en su propio componente */}
+      {/* Menú inferior reutilizable */}
       <BottomMenu
         activeTab={activeBottomTab}
         onTabChange={setActiveBottomTab}
@@ -632,70 +684,32 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
 
-  // Card Meta de ahorro
-  savingsCard: {
-    backgroundColor: COLORS.card,
-    borderRadius: 24,
-    padding: 18,
-    marginBottom: 20,
-  },
-  savingsHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  savingsTitle: {
-    fontSize: 15,
-    color: COLORS.muted,
-  },
-  savingsTotal: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  savingsProgressBackground: {
-    marginTop: 8,
-    marginBottom: 12,
+  // Savings (para pestaña "Metas de ahorro")
+  savingsBarBg: {
     height: 10,
     borderRadius: 999,
     backgroundColor: '#e5e7eb',
     overflow: 'hidden',
+    marginBottom: 12,
   },
-  savingsProgressFill: {
+  savingsBarFill: {
+    flex: 0.65, // 65% de la barra
     height: '100%',
     backgroundColor: COLORS.income,
-    borderRadius: 999,
   },
-  savingsBottomRow: {
+  savingsRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
     justifyContent: 'space-between',
-  },
-  savingsColumn: {
-    flex: 1,
-  },
-  savingsColumnRight: {
-    alignItems: 'flex-end',
+    marginTop: 4,
   },
   savingsLabel: {
     fontSize: 12,
     color: COLORS.muted,
-    marginBottom: 2,
   },
   savingsValue: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
     color: COLORS.text,
-  },
-  savingsPercent: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  savingsHint: {
-    marginTop: 10,
-    fontSize: 11,
-    color: COLORS.muted,
   },
 
   // Secciones
@@ -776,7 +790,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
 
-  // Card genérica (movimientos)
+  // Card genérica (Resumen de movimientos)
   card: {
     backgroundColor: COLORS.card,
     borderRadius: 24,
@@ -810,35 +824,163 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
+  // Tabs de periodo (Hoy / Semana / Mes / Personalizado)
+  periodTabsRow: {
+    flexDirection: 'row',
+    marginTop: 12,
+    marginBottom: 10,
+    backgroundColor: '#edf1f5',
+    borderRadius: 999,
+    padding: 4,
+  },
+  periodTab: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  periodTabActive: {
+    backgroundColor: COLORS.primary,
+  },
+  periodTabText: {
+    fontSize: 12,
+    color: COLORS.muted,
+    fontWeight: '500',
+  },
+  periodTabTextActive: {
+    color: COLORS.card,
+    fontWeight: '600',
+  },
+
+  // Search bar
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#edf1f5',
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginBottom: 14,
+  },
+  searchBarPlaceholder: {
+    fontSize: 13,
+    color: COLORS.muted,
+  },
+
+  // Resumen de categoría + gráfica
+  categorySummaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  categoryLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  categoryIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  categoryTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  categorySubtitle: {
+    fontSize: 13,
+    color: COLORS.muted,
+    marginTop: 2,
+  },
+  categoryPie: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  categoryPieLarge: {
+    position: 'absolute',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#1f2b4f',
+  },
+  categoryPieSmall: {
+    position: 'absolute',
+    right: 4,
+    top: 6,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#9ca9c8',
+  },
+
+  // Dropdown movimientos
+  dropdownHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  dropdownLabel: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+
   // Movimientos
   movItem: {
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#e2e8f0',
   },
-  movHeaderRow: {
+  movRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+  },
+  movAvatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  movAvatarText: {
+    color: COLORS.card,
+    fontWeight: '700',
+    fontSize: 14,
   },
   movDescripcion: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: COLORS.text,
   },
-  movFecha: {
+  movCategoria: {
     fontSize: 12,
     color: COLORS.muted,
     marginTop: 2,
   },
-  movCategoria: {
-    fontSize: 13,
+  movFecha: {
+    fontSize: 11,
     color: COLORS.muted,
-    marginTop: 4,
+    marginTop: 2,
   },
   movMonto: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
+    marginLeft: 8,
   },
   movMontoPositivo: {
     color: COLORS.income,
