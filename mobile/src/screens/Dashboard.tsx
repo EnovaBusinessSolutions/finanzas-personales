@@ -362,21 +362,33 @@ export default function Dashboard() {
         {/* UI para pestaña "Metas de ahorro" */}
         {activeTopTab === 'savings' && (
           <View style={styles.flowCard}>
-            <Text style={styles.flowTitle}>Progreso de tu meta de ahorro</Text>
-            <Text style={[styles.flowAmount, { marginBottom: 12 }]}>
-              $8,000.00 de $12,500.00
-            </Text>
+            {/* Header con título + montos alineados */}
+            <View style={styles.savingsHeaderRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.savingsTitle}>Meta de ahorro</Text>
+                <Text style={styles.savingsSubtitle}>
+                  Progreso de tu meta mensual
+                </Text>
+              </View>
 
+              <View style={styles.savingsRightBlock}>
+                <Text style={styles.savingsMainAmount}>$8,000.00</Text>
+                <Text style={styles.savingsSubAmount}>de $12,500.00</Text>
+              </View>
+            </View>
+
+            {/* Barra de progreso */}
             <View style={styles.savingsBarBg}>
               <View style={styles.savingsBarFill} />
             </View>
 
-            <View style={styles.savingsRow}>
-              <View>
+            {/* Stats inferiores */}
+            <View style={styles.savingsStatsRow}>
+              <View style={styles.savingsStat}>
                 <Text style={styles.savingsLabel}>Meta mensual</Text>
                 <Text style={styles.savingsValue}>$12,500.00</Text>
               </View>
-              <View>
+              <View style={styles.savingsStat}>
                 <Text style={styles.savingsLabel}>Ahorro acumulado</Text>
                 <Text style={styles.savingsValue}>$8,000.00</Text>
               </View>
@@ -743,26 +755,59 @@ const styles = StyleSheet.create({
   },
 
   // Savings (para pestaña "Metas de ahorro")
+  savingsHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 14,
+  },
+  savingsTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  savingsSubtitle: {
+    fontSize: 13,
+    color: COLORS.muted,
+    marginTop: 2,
+  },
+  savingsRightBlock: {
+    alignItems: 'flex-end',
+  },
+  savingsMainAmount: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  savingsSubAmount: {
+    fontSize: 13,
+    color: COLORS.muted,
+    marginTop: 2,
+  },
   savingsBarBg: {
     height: 10,
     borderRadius: 999,
     backgroundColor: '#e5e7eb',
     overflow: 'hidden',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   savingsBarFill: {
-    flex: 0.65,
+    flex: 0.64, // 64% de progreso
     height: '100%',
     backgroundColor: COLORS.income,
   },
-  savingsRow: {
+  savingsStatsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 4,
   },
+  savingsStat: {
+    flex: 1,
+  },
   savingsLabel: {
     fontSize: 12,
     color: COLORS.muted,
+    marginBottom: 2,
   },
   savingsValue: {
     fontSize: 14,
