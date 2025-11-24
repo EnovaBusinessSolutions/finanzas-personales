@@ -7,6 +7,7 @@ import Dashboard from './src/screens/Dashboard';
 import SettingsScreen from './src/screens/Settings';
 import SplashScreen from './src/screens/SplashScreen';
 import AuthScreen from './src/screens/AuthScreen';
+import AppLoadingScreen from './src/screens/AppLoadingScreen';
 
 import BottomMenu, { BottomTabKey } from './src/components/BottomMenu';
 import { COLORS } from './src/theme/colors';
@@ -16,9 +17,11 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<BottomTabKey>('home');
 
   // 👉 flujo de arranque
-  const [isSplashDone, setIsSplashDone] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSplashDone, setIsSplashDone] = useState(false);        // Pantalla E-nova
+  const [isAppLoadingDone, setIsAppLoadingDone] = useState(false); // Logo + barra 0–100%
+  const [isAuthenticated, setIsAuthenticated] = useState(false);   // Login/registro
 
+  // Splash negro sólo mientras se muestra la pantalla de E-nova
   const isSplashVisible = !isSplashDone;
 
   const renderMainContent = () => {
@@ -42,7 +45,7 @@ export default function App() {
       <SafeAreaView
         style={{
           flex: 1,
-          // 🔹 Negro absoluto mientras se muestra el splash
+          // 🔹 Negro absoluto mientras se muestra el splash de E-nova
           backgroundColor: isSplashVisible ? '#000000' : COLORS.background,
         }}
       >
@@ -58,13 +61,18 @@ export default function App() {
           <SplashScreen onFinish={() => setIsSplashDone(true)} />
         )}
 
-        {/* 2) Pantalla de auth (login/registro) */}
-        {isSplashDone && !isAuthenticated && (
+        {/* 2) Pantalla de carga de la app (logo Happy Life + barra 0–100%) */}
+        {isSplashDone && !isAppLoadingDone && (
+          <AppLoadingScreen onFinish={() => setIsAppLoadingDone(true)} />
+        )}
+
+        {/* 3) Pantalla de auth (login/registro) */}
+        {isSplashDone && isAppLoadingDone && !isAuthenticated && (
           <AuthScreen onAuthSuccess={() => setIsAuthenticated(true)} />
         )}
 
-        {/* 3) App principal con bottom nav */}
-        {isSplashDone && isAuthenticated && (
+        {/* 4) App principal con bottom nav */}
+        {isSplashDone && isAppLoadingDone && isAuthenticated && (
           <>
             <View style={{ flex: 1 }}>{renderMainContent()}</View>
 
