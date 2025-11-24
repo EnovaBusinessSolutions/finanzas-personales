@@ -14,7 +14,7 @@ export default function SettingsScreen() {
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(false);
 
-  // 👉 Estados visuales para personalización
+  // Estados visuales para personalización
   const [language, setLanguage] = useState<'es' | 'en'>('es');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
@@ -23,7 +23,9 @@ export default function SettingsScreen() {
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
       >
+        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Ajustes</Text>
           <Text style={styles.headerSubtitle}>
@@ -31,9 +33,10 @@ export default function SettingsScreen() {
           </Text>
         </View>
 
-        {/* Sección: Perfil */}
+        {/* Perfil */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Perfil</Text>
+
           <View style={styles.rowBetween}>
             <View>
               <Text style={styles.itemTitle}>Nombre</Text>
@@ -51,12 +54,12 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Sección: Notificaciones */}
+        {/* Notificaciones */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Notificaciones</Text>
 
           <View style={styles.rowBetween}>
-            <View style={{ flex: 1 }}>
+            <View style={styles.textBlock}>
               <Text style={styles.itemTitle}>Push</Text>
               <Text style={styles.itemSubtitle}>
                 Recibe avisos en tu teléfono sobre movimientos importantes.
@@ -73,7 +76,7 @@ export default function SettingsScreen() {
           <View style={styles.divider} />
 
           <View style={styles.rowBetween}>
-            <View style={{ flex: 1 }}>
+            <View style={styles.textBlock}>
               <Text style={styles.itemTitle}>Correo electrónico</Text>
               <Text style={styles.itemSubtitle}>
                 Resúmenes de gastos y recordatorios de pagos.
@@ -88,12 +91,12 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Sección: Seguridad */}
+        {/* Seguridad */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Seguridad</Text>
 
           <View style={styles.rowBetween}>
-            <View>
+            <View style={styles.textBlock}>
               <Text style={styles.itemTitle}>Bloqueo con PIN/biometría</Text>
               <Text style={styles.itemSubtitle}>
                 Recomendado para proteger tu información.
@@ -103,29 +106,29 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* ⭐ Nueva sección: Personalización */}
+        {/* Personalización */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Personalización</Text>
 
           {/* Idioma */}
-          <View style={{ marginBottom: 14 }}>
+          <View style={{ marginBottom: 18 }}>
             <Text style={styles.itemTitle}>Idioma de la app</Text>
             <Text style={styles.itemSubtitle}>
               Elige en qué idioma prefieres ver la información.
             </Text>
 
-            <View style={styles.chipRow}>
+            <View style={styles.segmentRow}>
               <TouchableOpacity
                 style={[
-                  styles.chip,
-                  language === 'es' && styles.chipActive,
+                  styles.segmentButton,
+                  language === 'es' && styles.segmentButtonActive,
                 ]}
                 onPress={() => setLanguage('es')}
               >
                 <Text
                   style={[
-                    styles.chipText,
-                    language === 'es' && styles.chipTextActive,
+                    styles.segmentText,
+                    language === 'es' && styles.segmentTextActive,
                   ]}
                 >
                   Español
@@ -134,15 +137,15 @@ export default function SettingsScreen() {
 
               <TouchableOpacity
                 style={[
-                  styles.chip,
-                  language === 'en' && styles.chipActive,
+                  styles.segmentButton,
+                  language === 'en' && styles.segmentButtonActive,
                 ]}
                 onPress={() => setLanguage('en')}
               >
                 <Text
                   style={[
-                    styles.chipText,
-                    language === 'en' && styles.chipTextActive,
+                    styles.segmentText,
+                    language === 'en' && styles.segmentTextActive,
                   ]}
                 >
                   Inglés
@@ -160,18 +163,18 @@ export default function SettingsScreen() {
               Cambia entre tema claro u oscuro de la app.
             </Text>
 
-            <View style={styles.chipRow}>
+            <View style={styles.segmentRow}>
               <TouchableOpacity
                 style={[
-                  styles.chip,
-                  theme === 'light' && styles.chipActive,
+                  styles.segmentButton,
+                  theme === 'light' && styles.segmentButtonActive,
                 ]}
                 onPress={() => setTheme('light')}
               >
                 <Text
                   style={[
-                    styles.chipText,
-                    theme === 'light' && styles.chipTextActive,
+                    styles.segmentText,
+                    theme === 'light' && styles.segmentTextActive,
                   ]}
                 >
                   Claro
@@ -180,15 +183,15 @@ export default function SettingsScreen() {
 
               <TouchableOpacity
                 style={[
-                  styles.chip,
-                  theme === 'dark' && styles.chipActive,
+                  styles.segmentButton,
+                  theme === 'dark' && styles.segmentButtonActive,
                 ]}
                 onPress={() => setTheme('dark')}
               >
                 <Text
                   style={[
-                    styles.chipText,
-                    theme === 'dark' && styles.chipTextActive,
+                    styles.segmentText,
+                    theme === 'dark' && styles.segmentTextActive,
                   ]}
                 >
                   Oscuro
@@ -215,9 +218,10 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 24,
+    paddingBottom: 24,
   },
   header: {
-    marginBottom: 16,
+    marginBottom: 18,
   },
   headerTitle: {
     fontSize: 24,
@@ -231,20 +235,25 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: COLORS.card,
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 24,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    marginBottom: 14,
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: COLORS.text,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   rowBetween: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  textBlock: {
+    flex: 1,
+    paddingRight: 16,
   },
   itemTitle: {
     fontSize: 14,
@@ -255,7 +264,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.muted,
     marginTop: 2,
-    maxWidth: 260,
+    lineHeight: 16,
   },
   divider: {
     height: 1,
@@ -268,30 +277,32 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
 
-  // Chips de personalización
-  chipRow: {
+  // Segment buttons (idioma / tema)
+  segmentRow: {
     flexDirection: 'row',
     marginTop: 10,
     gap: 8,
   },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+  segmentButton: {
+    flex: 1,
+    paddingVertical: 8,
     borderRadius: 999,
     borderWidth: 1,
     borderColor: '#d4d4d4',
     backgroundColor: '#f5f7fa',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  chipActive: {
+  segmentButtonActive: {
     backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
   },
-  chipText: {
+  segmentText: {
     fontSize: 12,
     color: COLORS.muted,
     fontWeight: '500',
   },
-  chipTextActive: {
+  segmentTextActive: {
     color: '#ffffff',
     fontWeight: '600',
   },
