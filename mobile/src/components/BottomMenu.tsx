@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useLanguage } from '../context/LanguageContext';
 
 // 👈 lo exportamos para usarlo también en App.tsx
 export type BottomTabKey = 'home' | 'reports' | 'goals' | 'settings';
@@ -35,19 +36,56 @@ type BottomMenuProps = {
   };
 };
 
+// Textos ES/EN para el menú inferior
+const STRINGS = {
+  es: {
+    navHome: 'Inicio',
+    navReports: 'Reportes',
+    navGoals: 'Metas',
+    navSettings: 'Ajustes',
+
+    addMenuTitle: 'Nuevo registro',
+    addGoal: 'Meta financiera',
+    addInvestment: 'Inversión',
+    addFinance3: 'Finanza 3',
+    addFinance4: 'Finanza 4',
+    addFinance5: 'Finanza 5',
+
+    soonTitle: 'Próximamente',
+    soonMessage: (label: string) =>
+      `La herramienta "${label}" aún está en proceso.`,
+  },
+  en: {
+    navHome: 'Home',
+    navReports: 'Reports',
+    navGoals: 'Goals',
+    navSettings: 'Settings',
+
+    addMenuTitle: 'New record',
+    addGoal: 'Financial goal',
+    addInvestment: 'Investment',
+    addFinance3: 'Finance 3',
+    addFinance4: 'Finance 4',
+    addFinance5: 'Finance 5',
+
+    soonTitle: 'Coming soon',
+    soonMessage: (label: string) =>
+      `The "${label}" tool is still in progress.`,
+  },
+};
+
 export default function BottomMenu({
   activeTab,
   onTabChange,
   colors,
 }: BottomMenuProps) {
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  const { language } = useLanguage();
+  const t = STRINGS[language];
 
   const handleMenuPress = (label: string) => {
     setIsAddMenuOpen(false);
-    Alert.alert(
-      'Próximamente',
-      `La herramienta "${label}" aún está en proceso.`,
-    );
+    Alert.alert(t.soonTitle, t.soonMessage(label));
   };
 
   return (
@@ -86,7 +124,7 @@ export default function BottomMenu({
                 },
               ]}
             >
-              Inicio
+              {t.navHome}
             </Text>
           </TouchableOpacity>
 
@@ -120,7 +158,7 @@ export default function BottomMenu({
                 },
               ]}
             >
-              Reportes
+              {t.navReports}
             </Text>
           </TouchableOpacity>
 
@@ -163,7 +201,7 @@ export default function BottomMenu({
                 },
               ]}
             >
-              Metas
+              {t.navGoals}
             </Text>
           </TouchableOpacity>
 
@@ -197,7 +235,7 @@ export default function BottomMenu({
                 },
               ]}
             >
-              Ajustes
+              {t.navSettings}
             </Text>
           </TouchableOpacity>
         </View>
@@ -224,9 +262,11 @@ export default function BottomMenu({
                   { color: colors.text },
                 ]}
               >
-                Nuevo registro
+                {t.addMenuTitle}
               </Text>
-              <TouchableOpacity onPress={() => setIsAddMenuOpen(false)}>
+              <TouchableOpacity
+                onPress={() => setIsAddMenuOpen(false)}
+              >
                 <Ionicons name="close" size={20} color={colors.text} />
               </TouchableOpacity>
             </View>
@@ -234,7 +274,7 @@ export default function BottomMenu({
             <View style={styles.addMenuGrid}>
               <TouchableOpacity
                 style={styles.addMenuItem}
-                onPress={() => handleMenuPress('Meta financiera')}
+                onPress={() => handleMenuPress(t.addGoal)}
               >
                 <View
                   style={[
@@ -254,13 +294,13 @@ export default function BottomMenu({
                     { color: colors.text },
                   ]}
                 >
-                  Meta financiera
+                  {t.addGoal}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.addMenuItem}
-                onPress={() => handleMenuPress('Inversión')}
+                onPress={() => handleMenuPress(t.addInvestment)}
               >
                 <View
                   style={[
@@ -280,13 +320,13 @@ export default function BottomMenu({
                     { color: colors.text },
                   ]}
                 >
-                  Inversión
+                  {t.addInvestment}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.addMenuItem}
-                onPress={() => handleMenuPress('Finanza 3')}
+                onPress={() => handleMenuPress(t.addFinance3)}
               >
                 <View
                   style={[
@@ -306,13 +346,13 @@ export default function BottomMenu({
                     { color: colors.text },
                   ]}
                 >
-                  Finanza 3
+                  {t.addFinance3}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.addMenuItem}
-                onPress={() => handleMenuPress('Finanza 4')}
+                onPress={() => handleMenuPress(t.addFinance4)}
               >
                 <View
                   style={[
@@ -332,13 +372,13 @@ export default function BottomMenu({
                     { color: colors.text },
                   ]}
                 >
-                  Finanza 4
+                  {t.addFinance4}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.addMenuItem}
-                onPress={() => handleMenuPress('Finanza 5')}
+                onPress={() => handleMenuPress(t.addFinance5)}
               >
                 <View
                   style={[
@@ -358,7 +398,7 @@ export default function BottomMenu({
                     { color: colors.text },
                   ]}
                 >
-                  Finanza 5
+                  {t.addFinance5}
                 </Text>
               </TouchableOpacity>
             </View>

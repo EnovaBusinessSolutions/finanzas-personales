@@ -5,8 +5,11 @@ import { StatusBar } from 'expo-status-bar';
 
 import Dashboard from './src/screens/Dashboard';
 import SettingsScreen from './src/screens/Settings';
-import BottomMenu, { BottomTabKey } from './src/components/BottomMenu';
+import BottomMenu, {
+  BottomTabKey,
+} from './src/components/BottomMenu';
 import { COLORS } from './src/theme/colors';
+import { LanguageProvider } from './src/context/LanguageContext';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<BottomTabKey>('home');
@@ -18,10 +21,9 @@ export default function App() {
       case 'settings':
         return <SettingsScreen />;
       case 'reports':
-        // Por ahora reutilizamos Dashboard como placeholder
+        // De momento placeholder
         return <Dashboard />;
       case 'goals':
-        // Igual, luego aquí irá la pantalla de metas real
         return <Dashboard />;
       default:
         return <Dashboard />;
@@ -29,18 +31,19 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
-      <StatusBar style="auto" />
-      <View style={{ flex: 1 }}>
-        {renderContent()}
-      </View>
+    <LanguageProvider>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: COLORS.background }}
+      >
+        <StatusBar style="auto" />
+        <View style={{ flex: 1 }}>{renderContent()}</View>
 
-      {/* Menú inferior fijo para todas las pantallas */}
-      <BottomMenu
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        colors={COLORS}
-      />
-    </SafeAreaView>
+        <BottomMenu
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          colors={COLORS}
+        />
+      </SafeAreaView>
+    </LanguageProvider>
   );
 }

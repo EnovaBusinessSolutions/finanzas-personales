@@ -7,16 +7,139 @@ import {
   StyleSheet,
   Switch,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { COLORS } from '../theme/colors';
+import { useLanguage, Language } from '../context/LanguageContext';
+
+// Textos en ES / EN
+const STRINGS = {
+  es: {
+    settingsTitle: 'Ajustes',
+    settingsSubtitle: 'Personaliza cómo quieres usar tu app financiera.',
+
+    profileTitle: 'Perfil',
+    nameLabel: 'Nombre',
+    emailLabel: 'Correo',
+
+    notificationsTitle: 'Notificaciones',
+    pushTitle: 'Push',
+    pushDesc:
+      'Recibe avisos en tu teléfono sobre movimientos importantes.',
+    emailTitle: 'Correo electrónico',
+    emailDesc: 'Resúmenes de gastos y recordatorios de pagos.',
+
+    securityTitle: 'Seguridad',
+    securityLockTitle: 'Bloqueo con PIN/biometría',
+    securityDesc: 'Recomendado para proteger tu información.',
+    securityAction: 'Configurar',
+
+    personalizationTitle: 'Personalización',
+    languageTitle: 'Idioma de la app',
+    languageDesc: 'Elige en qué idioma prefieres ver la información.',
+    themeTitle: 'Tema',
+    themeDesc: 'Cambia entre tema claro u oscuro de la app.',
+
+    spanishLabel: 'Español',
+    englishLabel: 'Inglés',
+    lightLabel: 'Claro',
+    darkLabel: 'Oscuro',
+
+    langDialogTitle: 'Cambiar idioma',
+    langDialogMessage:
+      'Esta configuración hará que toda la app se muestre en el idioma seleccionado.',
+    cancelLabel: 'Cancelar',
+    continueLabel: 'Continuar',
+
+    nameValue: 'Jose Manuel',
+    emailValue: 'correo@ejemplo.com',
+  },
+  en: {
+    settingsTitle: 'Settings',
+    settingsSubtitle: 'Customize how you want to use your finance app.',
+
+    profileTitle: 'Profile',
+    nameLabel: 'Name',
+    emailLabel: 'Email',
+
+    notificationsTitle: 'Notifications',
+    pushTitle: 'Push',
+    pushDesc: 'Get alerts on your phone about important movements.',
+    emailTitle: 'Email',
+    emailDesc: 'Expense summaries and payment reminders.',
+
+    securityTitle: 'Security',
+    securityLockTitle: 'PIN / biometrics lock',
+    securityDesc: 'Recommended to protect your information.',
+    securityAction: 'Configure',
+
+    personalizationTitle: 'Personalization',
+    languageTitle: 'App language',
+    languageDesc:
+      'Choose which language you prefer to see the information in.',
+    themeTitle: 'Theme',
+    themeDesc: 'Switch between light and dark mode for the app.',
+
+    spanishLabel: 'Spanish',
+    englishLabel: 'English',
+    lightLabel: 'Light',
+    darkLabel: 'Dark',
+
+    langDialogTitle: 'Change language',
+    langDialogMessage:
+      'This setting will change the language for the entire app.',
+    cancelLabel: 'Cancel',
+    continueLabel: 'Continue',
+
+    nameValue: 'Jose Manuel',
+    emailValue: 'email@example.com',
+  },
+};
 
 export default function SettingsScreen() {
+  const {
+    language,
+    setLanguage,
+    hasSeenLanguageInfo,
+    setHasSeenLanguageInfo,
+  } = useLanguage();
+
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(false);
-
-  // Estados visuales para personalización
-  const [language, setLanguage] = useState<'es' | 'en'>('es');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  const t = STRINGS[language];
+
+  const handleSelectLanguage = (lang: Language) => {
+    if (lang === language) return;
+
+    // Primera vez: mostrar popup explicativo
+    if (!hasSeenLanguageInfo) {
+      Alert.alert(
+        t.langDialogTitle,
+        t.langDialogMessage,
+        [
+          {
+            text: t.cancelLabel,
+            style: 'cancel',
+          },
+          {
+            text: t.continueLabel,
+            style: 'default',
+            onPress: () => {
+              setLanguage(lang);
+              setHasSeenLanguageInfo(true);
+            },
+          },
+        ],
+        { cancelable: true },
+      );
+      return;
+    }
+
+    // Si ya vio el mensaje, solo cambiamos idioma
+    setLanguage(lang);
+  };
 
   return (
     <View style={styles.screen}>
@@ -27,20 +150,20 @@ export default function SettingsScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Ajustes</Text>
+          <Text style={styles.headerTitle}>{t.settingsTitle}</Text>
           <Text style={styles.headerSubtitle}>
-            Personaliza cómo quieres usar tu app financiera.
+            {t.settingsSubtitle}
           </Text>
         </View>
 
         {/* Perfil */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Perfil</Text>
+          <Text style={styles.cardTitle}>{t.profileTitle}</Text>
 
           <View style={styles.rowBetween}>
             <View>
-              <Text style={styles.itemTitle}>Nombre</Text>
-              <Text style={styles.itemSubtitle}>Jose Manuel</Text>
+              <Text style={styles.itemTitle}>{t.nameLabel}</Text>
+              <Text style={styles.itemSubtitle}>{t.nameValue}</Text>
             </View>
           </View>
 
@@ -48,22 +171,20 @@ export default function SettingsScreen() {
 
           <View style={styles.rowBetween}>
             <View>
-              <Text style={styles.itemTitle}>Correo</Text>
-              <Text style={styles.itemSubtitle}>correo@ejemplo.com</Text>
+              <Text style={styles.itemTitle}>{t.emailLabel}</Text>
+              <Text style={styles.itemSubtitle}>{t.emailValue}</Text>
             </View>
           </View>
         </View>
 
         {/* Notificaciones */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Notificaciones</Text>
+          <Text style={styles.cardTitle}>{t.notificationsTitle}</Text>
 
           <View style={styles.rowBetween}>
             <View style={styles.textBlock}>
-              <Text style={styles.itemTitle}>Push</Text>
-              <Text style={styles.itemSubtitle}>
-                Recibe avisos en tu teléfono sobre movimientos importantes.
-              </Text>
+              <Text style={styles.itemTitle}>{t.pushTitle}</Text>
+              <Text style={styles.itemSubtitle}>{t.pushDesc}</Text>
             </View>
             <Switch
               value={pushEnabled}
@@ -77,10 +198,8 @@ export default function SettingsScreen() {
 
           <View style={styles.rowBetween}>
             <View style={styles.textBlock}>
-              <Text style={styles.itemTitle}>Correo electrónico</Text>
-              <Text style={styles.itemSubtitle}>
-                Resúmenes de gastos y recordatorios de pagos.
-              </Text>
+              <Text style={styles.itemTitle}>{t.emailTitle}</Text>
+              <Text style={styles.itemSubtitle}>{t.emailDesc}</Text>
             </View>
             <Switch
               value={emailEnabled}
@@ -93,28 +212,28 @@ export default function SettingsScreen() {
 
         {/* Seguridad */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Seguridad</Text>
+          <Text style={styles.cardTitle}>{t.securityTitle}</Text>
 
           <View style={styles.rowBetween}>
             <View style={styles.textBlock}>
-              <Text style={styles.itemTitle}>Bloqueo con PIN/biometría</Text>
-              <Text style={styles.itemSubtitle}>
-                Recomendado para proteger tu información.
-              </Text>
+              <Text style={styles.itemTitle}>{t.securityLockTitle}</Text>
+              <Text style={styles.itemSubtitle}>{t.securityDesc}</Text>
             </View>
-            <Text style={styles.linkText}>Configurar</Text>
+            <Text style={styles.linkText}>{t.securityAction}</Text>
           </View>
         </View>
 
         {/* Personalización */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Personalización</Text>
+          <Text style={styles.cardTitle}>
+            {t.personalizationTitle}
+          </Text>
 
           {/* Idioma */}
           <View style={{ marginBottom: 18 }}>
-            <Text style={styles.itemTitle}>Idioma de la app</Text>
+            <Text style={styles.itemTitle}>{t.languageTitle}</Text>
             <Text style={styles.itemSubtitle}>
-              Elige en qué idioma prefieres ver la información.
+              {t.languageDesc}
             </Text>
 
             <View style={styles.segmentRow}>
@@ -123,7 +242,7 @@ export default function SettingsScreen() {
                   styles.segmentButton,
                   language === 'es' && styles.segmentButtonActive,
                 ]}
-                onPress={() => setLanguage('es')}
+                onPress={() => handleSelectLanguage('es')}
               >
                 <Text
                   style={[
@@ -131,7 +250,7 @@ export default function SettingsScreen() {
                     language === 'es' && styles.segmentTextActive,
                   ]}
                 >
-                  Español
+                  {t.spanishLabel}
                 </Text>
               </TouchableOpacity>
 
@@ -140,7 +259,7 @@ export default function SettingsScreen() {
                   styles.segmentButton,
                   language === 'en' && styles.segmentButtonActive,
                 ]}
-                onPress={() => setLanguage('en')}
+                onPress={() => handleSelectLanguage('en')}
               >
                 <Text
                   style={[
@@ -148,7 +267,7 @@ export default function SettingsScreen() {
                     language === 'en' && styles.segmentTextActive,
                   ]}
                 >
-                  Inglés
+                  {t.englishLabel}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -156,12 +275,10 @@ export default function SettingsScreen() {
 
           <View style={styles.divider} />
 
-          {/* Tema */}
+          {/* Tema (visual por ahora) */}
           <View>
-            <Text style={styles.itemTitle}>Tema</Text>
-            <Text style={styles.itemSubtitle}>
-              Cambia entre tema claro u oscuro de la app.
-            </Text>
+            <Text style={styles.itemTitle}>{t.themeTitle}</Text>
+            <Text style={styles.itemSubtitle}>{t.themeDesc}</Text>
 
             <View style={styles.segmentRow}>
               <TouchableOpacity
@@ -177,7 +294,7 @@ export default function SettingsScreen() {
                     theme === 'light' && styles.segmentTextActive,
                   ]}
                 >
-                  Claro
+                  {t.lightLabel}
                 </Text>
               </TouchableOpacity>
 
@@ -194,7 +311,7 @@ export default function SettingsScreen() {
                     theme === 'dark' && styles.segmentTextActive,
                   ]}
                 >
-                  Oscuro
+                  {t.darkLabel}
                 </Text>
               </TouchableOpacity>
             </View>
