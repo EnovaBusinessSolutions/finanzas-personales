@@ -22,56 +22,60 @@ const AppLoadingScreen: React.FC<Props> = ({ onFinish }) => {
   const [showBar, setShowBar] = useState(false);
 
   // Animaciones del logo
-  const logoOpacity = useRef(new Animated.Value(0)).current;   // empieza transparente
-  const logoScale = useRef(new Animated.Value(0.7)).current;   // empieza al 70%
+  const logoOpacity = useRef(new Animated.Value(0)).current; // arranca transparente
+  const logoScale = useRef(new Animated.Value(0.9)).current; // arranca un poco pequeño
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
+    let finished = false;
 
+    // Animación del logo (similar a la de E-nova, pero un poco más larga)
     Animated.sequence([
-      // pequeña pausa antes de empezar
-      Animated.delay(250),
-
-      // fade-in + zoom muy suave y más largo
       Animated.parallel([
         Animated.timing(logoOpacity, {
           toValue: 1,
-          duration: 2200, // ~2.2s de aparición
+          duration: 1200, // 1.2s: se nota la aparición pero no es eterna
           easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         }),
-        Animated.timing(logoScale, {
+        Animated.spring(logoScale, {
           toValue: 1,
-          duration: 2200,
-          easing: Easing.out(Easing.quad),
+          friction: 6,
+          tension: 50,
           useNativeDriver: true,
         }),
       ]),
-
-      // dejamos el logo quieto un momento antes de mostrar la barra
-      Animated.delay(500),
+      // pequeña pausa con el logo ya visible
+      Animated.delay(400),
     ]).start(() => {
+      if (finished) return;
       setShowBar(true);
 
       // Lógica de la barra de progreso
-      let value = 0;
       interval = setInterval(() => {
-        value += 4;
-        if (value >= 100) {
-          value = 100;
-          if (interval) {
-            clearInterval(interval);
-            interval = null;
+        setProgress((prev) => {
+          let next = prev + 4;
+          if (next >= 100) {
+            next = 100;
+            if (interval) {
+              clearInterval(interval);
+              interval = null;
+            }
+            setTimeout(() => {
+              if (!finished) {
+                finished = true;
+                onFinish();
+              }
+            }, 400);
           }
-          // pequeña pausa al llegar al 100% antes de continuar
-          setTimeout(onFinish, 400);
-        }
-        setProgress(value);
+          return next;
+        });
       }, 120);
     });
 
-    // cleanup por si la pantalla se desmonta antes
+    // Cleanup por si la pantalla se desmonta antes
     return () => {
+      finished = true;
       if (interval) {
         clearInterval(interval);
       }
