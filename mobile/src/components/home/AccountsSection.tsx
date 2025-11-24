@@ -1,8 +1,10 @@
+// mobile/src/components/home/AccountsSection.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { COLORS } from '../../theme/colors';
 import { formatCurrency } from '../../utils/formatCurrency';
+import { useLanguage } from '../../context/LanguageContext';
 
 type Account = {
   id: string;
@@ -16,10 +18,22 @@ type Props = {
   accounts: Account[];
 };
 
+const STRINGS = {
+  es: {
+    sectionTitle: 'Mis cuentas',
+  },
+  en: {
+    sectionTitle: 'My accounts',
+  },
+};
+
 const AccountsSection: React.FC<Props> = ({ accounts }) => {
+  const { language } = useLanguage();
+  const t = STRINGS[language];
+
   return (
     <View style={{ marginBottom: 16 }}>
-      <Text style={styles.sectionTitle}>Mis cuentas</Text>
+      <Text style={styles.sectionTitle}>{t.sectionTitle}</Text>
       {accounts.map((acc) => (
         <View key={acc.id} style={styles.accountCard}>
           <View style={styles.accountLeft}>

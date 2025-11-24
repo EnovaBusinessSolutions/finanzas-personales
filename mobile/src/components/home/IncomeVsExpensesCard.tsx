@@ -1,14 +1,32 @@
+// mobile/src/components/home/IncomeVsExpensesCard.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { COLORS } from '../../theme/colors';
 import { formatCurrency } from '../../utils/formatCurrency';
+import { useLanguage } from '../../context/LanguageContext';
 
 type Props = {
   ingresos: number;
   gastos: number;
 };
 
+const STRINGS = {
+  es: {
+    title: 'Ingresos vs gastos',
+    incomeLabel: 'Ingresos',
+    expenseLabel: 'Gastos',
+  },
+  en: {
+    title: 'Income vs expenses',
+    incomeLabel: 'Income',
+    expenseLabel: 'Expenses',
+  },
+};
+
 const IncomeVsExpensesCard: React.FC<Props> = ({ ingresos, gastos }) => {
+  const { language } = useLanguage();
+  const t = STRINGS[language];
+
   const totalBar = ingresos + Math.abs(gastos) || 1;
   const fracIngresos = ingresos / totalBar;
   const fracGastos = Math.abs(gastos) / totalBar;
@@ -16,7 +34,7 @@ const IncomeVsExpensesCard: React.FC<Props> = ({ ingresos, gastos }) => {
   return (
     <View style={styles.flowCard}>
       <View style={styles.flowHeaderRow}>
-        <Text style={styles.flowTitle}>Ingresos vs gastos</Text>
+        <Text style={styles.flowTitle}>{t.title}</Text>
         <Text style={styles.flowAmount}>
           {formatCurrency(ingresos - Math.abs(gastos))}
         </Text>
@@ -33,7 +51,7 @@ const IncomeVsExpensesCard: React.FC<Props> = ({ ingresos, gastos }) => {
             style={[styles.flowDot, { backgroundColor: COLORS.income }]}
           />
           <View>
-            <Text style={styles.flowStatLabel}>Ingresos</Text>
+            <Text style={styles.flowStatLabel}>{t.incomeLabel}</Text>
             <Text
               style={[
                 styles.flowStatValue,
@@ -50,7 +68,7 @@ const IncomeVsExpensesCard: React.FC<Props> = ({ ingresos, gastos }) => {
             style={[styles.flowDot, { backgroundColor: COLORS.expense }]}
           />
           <View>
-            <Text style={styles.flowStatLabel}>Gastos</Text>
+            <Text style={styles.flowStatLabel}>{t.expenseLabel}</Text>
             <Text
               style={[
                 styles.flowStatValue,

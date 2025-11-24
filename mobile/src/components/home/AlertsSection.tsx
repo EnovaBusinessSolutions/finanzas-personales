@@ -1,7 +1,9 @@
+// mobile/src/components/home/AlertsSection.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { COLORS } from '../../theme/colors';
+import { useLanguage } from '../../context/LanguageContext';
 
 type AlertCard = {
   id: string;
@@ -14,10 +16,22 @@ type Props = {
   alerts: AlertCard[];
 };
 
+const STRINGS = {
+  es: {
+    sectionTitle: 'Alertas personalizadas',
+  },
+  en: {
+    sectionTitle: 'Personalized alerts',
+  },
+};
+
 const AlertsSection: React.FC<Props> = ({ alerts }) => {
+  const { language } = useLanguage();
+  const t = STRINGS[language];
+
   return (
     <View style={{ marginBottom: 16 }}>
-      <Text style={styles.sectionTitle}>Alertas personalizadas</Text>
+      <Text style={styles.sectionTitle}>{t.sectionTitle}</Text>
       <View style={styles.alertsRow}>
         {alerts.map((alert) => (
           <View

@@ -1,3 +1,4 @@
+// mobile/src/components/home/MovementsSummaryCard.tsx
 import React from 'react';
 import {
   View,
@@ -9,6 +10,7 @@ import {
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { COLORS } from '../../theme/colors';
 import { formatCurrency } from '../../utils/formatCurrency';
+import { useLanguage } from '../../context/LanguageContext';
 
 export type PeriodKey = 'hoy' | 'semana' | 'mes' | 'personalizado';
 
@@ -27,6 +29,25 @@ type Props = {
   onReload: () => void;
 };
 
+const STRINGS = {
+  es: {
+    cardTitle: 'Resumen de movimientos',
+    today: 'Hoy',
+    week: 'Semana',
+    month: 'Mes',
+    searchPlaceholder: 'Buscar por comercio o categoría',
+    totalThisMonth: 'total este mes',
+  },
+  en: {
+    cardTitle: 'Transactions summary',
+    today: 'Today',
+    week: 'Week',
+    month: 'Month',
+    searchPlaceholder: 'Search by merchant or category',
+    totalThisMonth: 'total this month',
+  },
+};
+
 const MovementsSummaryCard: React.FC<Props> = ({
   segments,
   activePeriod,
@@ -34,10 +55,20 @@ const MovementsSummaryCard: React.FC<Props> = ({
   loading,
   onReload,
 }) => {
+  const { language } = useLanguage();
+  const t = STRINGS[language];
+
+  const periodTabs = [
+    { key: 'hoy' as PeriodKey, label: t.today },
+    { key: 'semana' as PeriodKey, label: t.week },
+    { key: 'mes' as PeriodKey, label: t.month },
+    { key: 'personalizado' as PeriodKey, icon: 'calendar-outline' },
+  ];
+
   return (
     <View style={styles.card}>
       <View style={styles.rowBetween}>
-        <Text style={styles.cardTitle}>Resumen de movimientos</Text>
+        <Text style={styles.cardTitle}>{t.cardTitle}</Text>
         {loading ? (
           <ActivityIndicator size="small" color={COLORS.primary} />
         ) : (
@@ -51,14 +82,10 @@ const MovementsSummaryCard: React.FC<Props> = ({
         )}
       </View>
 
+      {/* Tabs de periodo */}
       <View style={styles.periodTabsRow}>
-        {[
-          { key: 'hoy', label: 'Hoy' },
-          { key: 'semana', label: 'Semana' },
-          { key: 'mes', label: 'Mes' },
-          { key: 'personalizado', icon: 'calendar-outline' },
-        ].map((tab) => {
-          const isActive = activePeriod === (tab.key as PeriodKey);
+        {periodTabs.map((tab) => {
+          const isActive = activePeriod === tab.key;
           return (
             <TouchableOpacity
               key={tab.key}
@@ -66,7 +93,7 @@ const MovementsSummaryCard: React.FC<Props> = ({
                 styles.periodTab,
                 isActive && styles.periodTabActive,
               ]}
-              onPress={() => onChangePeriod(tab.key as PeriodKey)}
+              onPress={() => onChangePeriod(tab.key)}
             >
               {tab.icon ? (
                 <Ionicons
@@ -90,6 +117,7 @@ const MovementsSummaryCard: React.FC<Props> = ({
         })}
       </View>
 
+      {/* Search bar */}
       <View style={styles.searchBar}>
         <Ionicons
           name="search-outline"
@@ -98,10 +126,11 @@ const MovementsSummaryCard: React.FC<Props> = ({
           style={{ marginRight: 6 }}
         />
         <Text style={styles.searchBarPlaceholder}>
-          Buscar por comercio o categoría
+          {t.searchPlaceholder}
         </Text>
       </View>
 
+      {/* Segmentos */}
       {segments.map((segment) => (
         <View key={segment.id} style={styles.segmentCard}>
           <View style={styles.segmentHeader}>
@@ -116,7 +145,7 @@ const MovementsSummaryCard: React.FC<Props> = ({
               <View>
                 <Text style={styles.segmentTitle}>{segment.titulo}</Text>
                 <Text style={styles.segmentSubtitle}>
-                  {formatCurrency(segment.total)} total este mes
+                  {formatCurrency(segment.total)} {t.totalThisMonth}
                 </Text>
               </View>
             </View>
