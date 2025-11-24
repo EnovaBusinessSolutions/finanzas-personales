@@ -4,43 +4,41 @@ import {
   View,
   StyleSheet,
   Animated,
-  StatusBar,
+  Dimensions,
 } from 'react-native';
-import { COLORS } from '../theme/colors';
 
-type SplashScreenProps = {
+const { width } = Dimensions.get('window');
+const LOGO_SIZE = width * 0.6; // 👈 60% del ancho de la pantalla
+
+type Props = {
   onFinish: () => void;
 };
 
-const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
-  // Valores animados
+const SplashScreen: React.FC<Props> = ({ onFinish }) => {
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
-    // 1) Animación de entrada del logo
-    Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scale, {
-        toValue: 1,
-        friction: 6,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      // 2) Pequeña pausa y luego pasamos a Auth
-      setTimeout(onFinish, 700);
-    });
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scale, {
+          toValue: 1,
+          friction: 6,
+          tension: 60,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.delay(700),
+    ]).start(onFinish);
   }, [opacity, scale, onFinish]);
 
   return (
     <View style={styles.container}>
-      {/* Opcional: status bar oscura mientras carga */}
-      <StatusBar barStyle="light-content" />
-
       <Animated.Image
         source={require('../../assets/enova-logo.png')}
         style={[
@@ -59,13 +57,13 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000', // fondo negro para tu branding
+    backgroundColor: '#000', // fondo negro para que luzca el logo
     alignItems: 'center',
     justifyContent: 'center',
   },
   logo: {
-    width: '70%',   // se ve bien en la mayoría de móviles
-    height: '20%',  // controlamos la altura para que no ocupe todo
+    width: LOGO_SIZE,
+    height: LOGO_SIZE, // cuadrado, se respeta el aspect ratio con "contain"
   },
 });
 
