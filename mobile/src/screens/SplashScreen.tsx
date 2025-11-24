@@ -23,7 +23,7 @@ const SplashScreen: React.FC<Props> = ({ onFinish }) => {
       Animated.parallel([
         Animated.timing(opacity, {
           toValue: 1,
-          duration: 800,
+          duration: 1400,
           useNativeDriver: true,
         }),
         Animated.spring(scale, {
@@ -33,7 +33,7 @@ const SplashScreen: React.FC<Props> = ({ onFinish }) => {
           useNativeDriver: true,
         }),
       ]),
-      Animated.delay(700),
+      Animated.delay(1800),
     ]).start(onFinish);
   }, [opacity, scale, onFinish]);
 

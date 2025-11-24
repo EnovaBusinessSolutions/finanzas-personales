@@ -19,6 +19,8 @@ export default function App() {
   const [isSplashDone, setIsSplashDone] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  const isSplashVisible = !isSplashDone;
+
   const renderMainContent = () => {
     switch (activeTab) {
       case 'home':
@@ -38,9 +40,18 @@ export default function App() {
   return (
     <LanguageProvider>
       <SafeAreaView
-        style={{ flex: 1, backgroundColor: COLORS.background }}
+        style={{
+          flex: 1,
+          // 🔹 Negro absoluto mientras se muestra el splash
+          backgroundColor: isSplashVisible ? '#000000' : COLORS.background,
+        }}
       >
-        <StatusBar style="light" />
+        {/* 🔹 Barra de estado: texto claro sobre negro en el splash,
+            texto oscuro sobre fondo claro en el resto de la app */}
+        <StatusBar
+          style={isSplashVisible ? 'light' : 'dark'}
+          backgroundColor={isSplashVisible ? '#000000' : COLORS.background}
+        />
 
         {/* 1) Splash con logo E-nova */}
         {!isSplashDone && (
