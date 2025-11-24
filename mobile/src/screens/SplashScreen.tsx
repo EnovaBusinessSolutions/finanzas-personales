@@ -1,26 +1,21 @@
 // mobile/src/screens/SplashScreen.tsx
 import React, { useEffect } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
-import { COLORS } from '../theme/colors';
+import { StatusBar } from 'expo-status-bar';
 
 type SplashScreenProps = {
-  onFinish?: () => void; // opcional, por si luego quieres controlar el flujo desde App.tsx
+  onFinish: () => void;
 };
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
-  // Pequeño delay para mostrar el splash
   useEffect(() => {
-    if (!onFinish) return;
-
-    const timer = setTimeout(() => {
-      onFinish();
-    }, 1500);
-
+    const timer = setTimeout(onFinish, 1800);
     return () => clearTimeout(timer);
   }, [onFinish]);
 
   return (
     <View style={styles.container}>
+      <StatusBar style="light" backgroundColor="#000000" />
       <Image
         source={require('../../assets/enova-logo.png')}
         style={styles.logo}
@@ -33,13 +28,14 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000', // fondo negro tipo E-nova
-    alignItems: 'center',
+    backgroundColor: '#000000',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   logo: {
-    width: 220,
-    height: 60,
+    width: '60%',      // ocupa el 60% del ancho
+    maxWidth: 320,     // límite para que no explote en tablets
+    aspectRatio: 4,    // aprox relación ancho/alto del logo
   },
 });
 
