@@ -1,52 +1,80 @@
 // mobile/src/screens/AppLoadingScreen.tsx
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
 import { COLORS } from '../theme/colors';
 
 type Props = {
   onFinish: () => void;
 };
 
+const { width } = Dimensions.get('window');
+const LOGO_SIZE = width * 0.55; // 55% del ancho de pantalla
+
 const AppLoadingScreen: React.FC<Props> = ({ onFinish }) => {
   const [progress, setProgress] = useState(0);
+  const [showBar, setShowBar] = useState(false);
+
+  // Animaciones del logo
+  const logoOpacity = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
-    // Simulamos carga del 0 al 100
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(onFinish, 500); // pequeña pausa al llegar al 100
-          return 100;
-        }
-        return prev + 4; // velocidad de llenado
-      });
-    }, 120);
+    // 1) Animar aparición del logo
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(logoOpacity, {
+          toValue: 1,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+        Animated.spring(logoScale, {
+          toValue: 1,
+          friction: 6,
+          tension: 60,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.delay(200), // pequeña pausa con el logo ya visible
+    ]).start(() => {
+      // 2) Cuando termina la animación del logo, mostramos la barra
+      setShowBar(true);
 
-    return () => clearInterval(interval);
-  }, [onFinish]);
+      let value = 0;
+      const interval = setInterval(() => {
+        value += 4;
+        if (value >= 100) {
+          value = 100;
+          clearInterval(interval);
+          // pequeña pausa en 100% antes de continuar
+          setTimeout(onFinish, 400);
+        }
+        setProgress(value);
+      }, 120);
+    });
+  }, [logoOpacity, logoScale, onFinish]);
 
   return (
     <View style={styles.container}>
-      {/* LOGO grande */}
-      <Image
+      <Animated.Image
         source={require('../../assets/app-logo.png')}
-        style={styles.logo}
+        style={[
+          styles.logo,
+          {
+            opacity: logoOpacity,
+            transform: [{ scale: logoScale }],
+          },
+        ]}
         resizeMode="contain"
       />
 
-      {/* Barra de progreso */}
-      <View style={styles.progressContainer}>
-        <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              { width: `${progress}%` },
-            ]}
-          />
+      {showBar && (
+        <View style={styles.loadingWrapper}>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: `${progress}%` }]} />
+          </View>
+          <Text style={styles.progressText}>{progress}%</Text>
         </View>
-        <Text style={styles.progressText}>{progress}%</Text>
-      </View>
+      )}
     </View>
   );
 };
@@ -59,20 +87,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 260,   // 🔹 Logo más grande
-    height: 260,  //  (ajusta si lo quieres aún más)
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
     marginBottom: 48,
   },
-  progressContainer: {
-    width: '78%',
+  loadingWrapper: {
+    width: '76%',
     alignItems: 'center',
   },
   progressTrack: {
     width: '100%',
-    height: 14, // 🔹 Barra más alta
+    height: 12,
     borderRadius: 999,
-    backgroundColor: '#dbe4f0', // tono claro acorde al tema
+    backgroundColor: '#dde5f0',
     overflow: 'hidden',
+    marginBottom: 10,
   },
   progressFill: {
     height: '100%',
@@ -80,10 +109,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary, // azul principal de la app
   },
   progressText: {
-    marginTop: 10,
     fontSize: 14,
-    fontWeight: '500',
     color: COLORS.muted,
+    fontWeight: '500',
   },
 });
 
