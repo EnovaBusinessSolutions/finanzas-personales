@@ -19,39 +19,38 @@ const AppLoadingScreen: React.FC<Props> = ({ onFinish }) => {
   const logoScale = useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
-    // 1) Animar aparición del logo
-    Animated.sequence([
-      Animated.parallel([
-        Animated.timing(logoOpacity, {
-          toValue: 1,
-          duration: 900,
-          useNativeDriver: true,
-        }),
-        Animated.spring(logoScale, {
-          toValue: 1,
-          friction: 6,
-          tension: 60,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.delay(200), // pequeña pausa con el logo ya visible
-    ]).start(() => {
-      // 2) Cuando termina la animación del logo, mostramos la barra
-      setShowBar(true);
+  // Arranque más suave y largo del logo
+  Animated.sequence([
+    Animated.parallel([
+      Animated.timing(logoOpacity, {
+        toValue: 1,
+        duration: 1800,      // ⬅️ antes 900ms, ahora 1.8s
+        useNativeDriver: true,
+      }),
+      Animated.spring(logoScale, {
+        toValue: 1,
+        friction: 7,         // ⬅️ un pelín más suave
+        tension: 40,         // ⬅️ menos “rebotón”
+        useNativeDriver: true,
+      }),
+    ]),
+    Animated.delay(400),      // ⬅️ pequeña pausa con el logo ya visible
+  ]).start(() => {
+    setShowBar(true);
+    // aquí sigue tu lógica de la barra de progreso
+    let value = 0;
+    const interval = setInterval(() => {
+      value += 4;
+      if (value >= 100) {
+        value = 100;
+        clearInterval(interval);
+        setTimeout(onFinish, 400);
+      }
+      setProgress(value);
+    }, 120);
+  });
+}, [logoOpacity, logoScale, onFinish]);
 
-      let value = 0;
-      const interval = setInterval(() => {
-        value += 4;
-        if (value >= 100) {
-          value = 100;
-          clearInterval(interval);
-          // pequeña pausa en 100% antes de continuar
-          setTimeout(onFinish, 400);
-        }
-        setProgress(value);
-      }, 120);
-    });
-  }, [logoOpacity, logoScale, onFinish]);
 
   return (
     <View style={styles.container}>
