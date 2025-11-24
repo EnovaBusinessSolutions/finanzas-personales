@@ -7,11 +7,12 @@ import {
   StyleSheet,
   Platform,
   Modal,
-  Alert, // 👈 NUEVO
+  Alert,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-type BottomTabKey = 'home' | 'reports' | 'goals' | 'settings';
+// 👈 lo exportamos para usarlo también en App.tsx
+export type BottomTabKey = 'home' | 'reports' | 'goals' | 'settings';
 
 type BottomMenuProps = {
   activeTab: BottomTabKey;
@@ -41,10 +42,12 @@ export default function BottomMenu({
 }: BottomMenuProps) {
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
 
-  // 👇 Handler genérico para las opciones del submenú
   const handleMenuPress = (label: string) => {
     setIsAddMenuOpen(false);
-    Alert.alert('Próximamente', `La herramienta "${label}" aún está en proceso.`);
+    Alert.alert(
+      'Próximamente',
+      `La herramienta "${label}" aún está en proceso.`,
+    );
   };
 
   return (
