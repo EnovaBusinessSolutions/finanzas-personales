@@ -11,50 +11,41 @@ const AppLoadingScreen: React.FC<Props> = ({ onFinish }) => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // ⏱ Duración total de la “carga” (en ms)
-    const totalDuration = 3500; // 3.5 segundos aprox
-    const intervalMs = 50;
-    const step = 100 / (totalDuration / intervalMs);
-
+    // Simulamos carga del 0 al 100
     const interval = setInterval(() => {
       setProgress((prev) => {
-        const next = prev + step;
-        if (next >= 100) {
+        if (prev >= 100) {
           clearInterval(interval);
-          onFinish(); // Cuando llega a 100, pasamos a Auth
+          setTimeout(onFinish, 500); // pequeña pausa al llegar al 100
           return 100;
         }
-        return next;
+        return prev + 4; // velocidad de llenado
       });
-    }, intervalMs);
+    }, 120);
 
     return () => clearInterval(interval);
   }, [onFinish]);
 
   return (
     <View style={styles.container}>
-      {/* Logo de la app */}
+      {/* LOGO grande */}
       <Image
         source={require('../../assets/app-logo.png')}
         style={styles.logo}
         resizeMode="contain"
       />
 
-      {/* Nombre de la app */}
-      <Text style={styles.appName}>Happy Life</Text>
-      <Text style={styles.subtitle}>Personal finance</Text>
-
       {/* Barra de progreso */}
-      <View style={styles.progressWrapper}>
-        <View style={styles.progressBarBg}>
+      <View style={styles.progressContainer}>
+        <View style={styles.progressTrack}>
           <View
             style={[
-              styles.progressBarFill,
-              { width: `${Math.round(progress)}%` },
+              styles.progressFill,
+              { width: `${progress}%` },
             ]}
           />
         </View>
-        <Text style={styles.progressText}>{Math.round(progress)}%</Text>
+        <Text style={styles.progressText}>{progress}%</Text>
       </View>
     </View>
   );
@@ -63,46 +54,35 @@ const AppLoadingScreen: React.FC<Props> = ({ onFinish }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background, // mismo fondo que la app
+    backgroundColor: COLORS.background,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 32,
   },
   logo: {
-    width: 180,
-    height: 180,
-    marginBottom: 16,
+    width: 260,   // 🔹 Logo más grande
+    height: 260,  //  (ajusta si lo quieres aún más)
+    marginBottom: 48,
   },
-  appName: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: COLORS.muted,
-    marginBottom: 32,
-  },
-  progressWrapper: {
-    width: '80%',
+  progressContainer: {
+    width: '78%',
     alignItems: 'center',
   },
-  progressBarBg: {
+  progressTrack: {
     width: '100%',
-    height: 8,
+    height: 14, // 🔹 Barra más alta
     borderRadius: 999,
-    backgroundColor: '#d4dde5',
+    backgroundColor: '#dbe4f0', // tono claro acorde al tema
     overflow: 'hidden',
-    marginBottom: 8,
   },
-  progressBarFill: {
+  progressFill: {
     height: '100%',
-    backgroundColor: COLORS.primary,
     borderRadius: 999,
+    backgroundColor: COLORS.primary, // azul principal de la app
   },
   progressText: {
-    fontSize: 12,
+    marginTop: 10,
+    fontSize: 14,
+    fontWeight: '500',
     color: COLORS.muted,
   },
 });
