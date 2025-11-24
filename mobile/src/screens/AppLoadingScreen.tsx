@@ -1,6 +1,13 @@
 // mobile/src/screens/AppLoadingScreen.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Animated,
+  Dimensions,
+  Easing,
+} from 'react-native';
 import { COLORS } from '../theme/colors';
 
 type Props = {
@@ -15,42 +22,61 @@ const AppLoadingScreen: React.FC<Props> = ({ onFinish }) => {
   const [showBar, setShowBar] = useState(false);
 
   // Animaciones del logo
-  const logoOpacity = useRef(new Animated.Value(0)).current;
-  const logoScale = useRef(new Animated.Value(0.9)).current;
+  const logoOpacity = useRef(new Animated.Value(0)).current;   // empieza transparente
+  const logoScale = useRef(new Animated.Value(0.7)).current;   // empieza al 70%
 
   useEffect(() => {
-  // Arranque más suave y largo del logo
-  Animated.sequence([
-    Animated.parallel([
-      Animated.timing(logoOpacity, {
-        toValue: 1,
-        duration: 1800,      // ⬅️ antes 900ms, ahora 1.8s
-        useNativeDriver: true,
-      }),
-      Animated.spring(logoScale, {
-        toValue: 1,
-        friction: 7,         // ⬅️ un pelín más suave
-        tension: 40,         // ⬅️ menos “rebotón”
-        useNativeDriver: true,
-      }),
-    ]),
-    Animated.delay(400),      // ⬅️ pequeña pausa con el logo ya visible
-  ]).start(() => {
-    setShowBar(true);
-    // aquí sigue tu lógica de la barra de progreso
-    let value = 0;
-    const interval = setInterval(() => {
-      value += 4;
-      if (value >= 100) {
-        value = 100;
-        clearInterval(interval);
-        setTimeout(onFinish, 400);
-      }
-      setProgress(value);
-    }, 120);
-  });
-}, [logoOpacity, logoScale, onFinish]);
+    let interval: ReturnType<typeof setInterval> | null = null;
 
+    Animated.sequence([
+      // pequeña pausa antes de empezar
+      Animated.delay(250),
+
+      // fade-in + zoom muy suave y más largo
+      Animated.parallel([
+        Animated.timing(logoOpacity, {
+          toValue: 1,
+          duration: 2200, // ~2.2s de aparición
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(logoScale, {
+          toValue: 1,
+          duration: 2200,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+
+      // dejamos el logo quieto un momento antes de mostrar la barra
+      Animated.delay(500),
+    ]).start(() => {
+      setShowBar(true);
+
+      // Lógica de la barra de progreso
+      let value = 0;
+      interval = setInterval(() => {
+        value += 4;
+        if (value >= 100) {
+          value = 100;
+          if (interval) {
+            clearInterval(interval);
+            interval = null;
+          }
+          // pequeña pausa al llegar al 100% antes de continuar
+          setTimeout(onFinish, 400);
+        }
+        setProgress(value);
+      }, 120);
+    });
+
+    // cleanup por si la pantalla se desmonta antes
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [logoOpacity, logoScale, onFinish]);
 
   return (
     <View style={styles.container}>
