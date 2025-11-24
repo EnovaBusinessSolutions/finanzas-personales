@@ -6,12 +6,17 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
+  TouchableOpacity,
 } from 'react-native';
 import { COLORS } from '../theme/colors';
 
 export default function SettingsScreen() {
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(false);
+
+  // 👉 Estados visuales para personalización
+  const [language, setLanguage] = useState<'es' | 'en'>('es');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   return (
     <View style={styles.screen}>
@@ -98,6 +103,101 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        {/* ⭐ Nueva sección: Personalización */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Personalización</Text>
+
+          {/* Idioma */}
+          <View style={{ marginBottom: 14 }}>
+            <Text style={styles.itemTitle}>Idioma de la app</Text>
+            <Text style={styles.itemSubtitle}>
+              Elige en qué idioma prefieres ver la información.
+            </Text>
+
+            <View style={styles.chipRow}>
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  language === 'es' && styles.chipActive,
+                ]}
+                onPress={() => setLanguage('es')}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    language === 'es' && styles.chipTextActive,
+                  ]}
+                >
+                  Español
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  language === 'en' && styles.chipActive,
+                ]}
+                onPress={() => setLanguage('en')}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    language === 'en' && styles.chipTextActive,
+                  ]}
+                >
+                  Inglés
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* Tema */}
+          <View>
+            <Text style={styles.itemTitle}>Tema</Text>
+            <Text style={styles.itemSubtitle}>
+              Cambia entre tema claro u oscuro de la app.
+            </Text>
+
+            <View style={styles.chipRow}>
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  theme === 'light' && styles.chipActive,
+                ]}
+                onPress={() => setTheme('light')}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    theme === 'light' && styles.chipTextActive,
+                  ]}
+                >
+                  Claro
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  theme === 'dark' && styles.chipActive,
+                ]}
+                onPress={() => setTheme('dark')}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    theme === 'dark' && styles.chipTextActive,
+                  ]}
+                >
+                  Oscuro
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
         <View style={{ height: 120 }} />
       </ScrollView>
     </View>
@@ -155,7 +255,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.muted,
     marginTop: 2,
-    maxWidth: 220,
+    maxWidth: 260,
   },
   divider: {
     height: 1,
@@ -166,5 +266,33 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: COLORS.primary,
+  },
+
+  // Chips de personalización
+  chipRow: {
+    flexDirection: 'row',
+    marginTop: 10,
+    gap: 8,
+  },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#d4d4d4',
+    backgroundColor: '#f5f7fa',
+  },
+  chipActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  chipText: {
+    fontSize: 12,
+    color: COLORS.muted,
+    fontWeight: '500',
+  },
+  chipTextActive: {
+    color: '#ffffff',
+    fontWeight: '600',
   },
 });
