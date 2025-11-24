@@ -22,63 +22,58 @@ const AppLoadingScreen: React.FC<Props> = ({ onFinish }) => {
   const [showBar, setShowBar] = useState(false);
 
   // Animaciones del logo
-  const logoOpacity = useRef(new Animated.Value(0)).current; // arranca transparente
-  const logoScale = useRef(new Animated.Value(0.9)).current; // arranca un poco pequeño
+  const logoOpacity = useRef(new Animated.Value(0)).current; // empieza transparente
+  const logoScale = useRef(new Animated.Value(0.85)).current; // empieza un poco pequeño
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
-    let finished = false;
+    let barTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    // Animación del logo (similar a la de E-nova, pero un poco más larga)
-    Animated.sequence([
-      Animated.parallel([
-        Animated.timing(logoOpacity, {
-          toValue: 1,
-          duration: 1200, // 1.2s: se nota la aparición pero no es eterna
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: true,
-        }),
-        Animated.spring(logoScale, {
-          toValue: 1,
-          friction: 6,
-          tension: 50,
-          useNativeDriver: true,
-        }),
-      ]),
-      // pequeña pausa con el logo ya visible
-      Animated.delay(400),
-    ]).start(() => {
-      if (finished) return;
+    // 1) Animación del logo (se dispara en cuanto se monta la pantalla)
+    Animated.parallel([
+      Animated.timing(logoOpacity, {
+        toValue: 1,
+        duration: 1300, // aparición más progresiva
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(logoScale, {
+        toValue: 1,
+        duration: 1300,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // 2) Mostramos la barra un poquito después,
+    //    cuando el logo ya es claramente visible
+    barTimeout = setTimeout(() => {
       setShowBar(true);
 
-      // Lógica de la barra de progreso
+      let value = 0;
       interval = setInterval(() => {
-        setProgress((prev) => {
-          let next = prev + 4;
-          if (next >= 100) {
-            next = 100;
-            if (interval) {
-              clearInterval(interval);
-              interval = null;
-            }
-            setTimeout(() => {
-              if (!finished) {
-                finished = true;
-                onFinish();
-              }
-            }, 400);
-          }
-          return next;
-        });
-      }, 120);
-    });
+        value += 4;
+        if (value >= 100) {
+          value = 100;
+          setProgress(value);
 
-    // Cleanup por si la pantalla se desmonta antes
+          if (interval) {
+            clearInterval(interval);
+            interval = null;
+          }
+
+          // pequeña pausa al llegar a 100% antes de pasar a Auth
+          setTimeout(onFinish, 400);
+        } else {
+          setProgress(value);
+        }
+      }, 120);
+    }, 800); // espera antes de mostrar la barra
+
+    // Limpieza si la pantalla se desmonta antes
     return () => {
-      finished = true;
-      if (interval) {
-        clearInterval(interval);
-      }
+      if (interval) clearInterval(interval);
+      if (barTimeout) clearTimeout(barTimeout);
     };
   }, [logoOpacity, logoScale, onFinish]);
 
