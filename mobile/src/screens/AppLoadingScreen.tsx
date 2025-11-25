@@ -1,12 +1,11 @@
 // mobile/src/screens/AppLoadingScreen.tsx
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Animated,
   Dimensions,
-  Easing,
+  Image,
 } from 'react-native';
 import { COLORS } from '../theme/colors';
 
@@ -21,32 +20,12 @@ const AppLoadingScreen: React.FC<Props> = ({ onFinish }) => {
   const [progress, setProgress] = useState(0);
   const [showBar, setShowBar] = useState(false);
 
-  // Animaciones del logo
-  const logoOpacity = useRef(new Animated.Value(0)).current; // empieza transparente
-  const logoScale = useRef(new Animated.Value(0.85)).current; // empieza un poco pequeño
-
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
     let barTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    // 1) Animación del logo (se dispara en cuanto se monta la pantalla)
-    Animated.parallel([
-      Animated.timing(logoOpacity, {
-        toValue: 1,
-        duration: 1300, // aparición más progresiva
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.timing(logoScale, {
-        toValue: 1,
-        duration: 1300,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    // 2) Mostramos la barra un poquito después,
-    //    cuando el logo ya es claramente visible
+    // 🔹 El logo ya está visible desde el primer render.
+    // Solo controlamos CUÁNDO aparece la barra de carga.
     barTimeout = setTimeout(() => {
       setShowBar(true);
 
@@ -75,19 +54,14 @@ const AppLoadingScreen: React.FC<Props> = ({ onFinish }) => {
       if (interval) clearInterval(interval);
       if (barTimeout) clearTimeout(barTimeout);
     };
-  }, [logoOpacity, logoScale, onFinish]);
+  }, [onFinish]);
 
   return (
     <View style={styles.container}>
-      <Animated.Image
+      {/* Logo fijo, sin animación */}
+      <Image
         source={require('../../assets/app-logo.png')}
-        style={[
-          styles.logo,
-          {
-            opacity: logoOpacity,
-            transform: [{ scale: logoScale }],
-          },
-        ]}
+        style={styles.logo}
         resizeMode="contain"
       />
 
