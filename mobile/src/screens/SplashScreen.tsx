@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   fromLabel: {
     fontSize: 18,          // texto “from” grande
     color: COLORS.muted,
-    marginBottom: 2,       // 🔹 más pegado al logo
+    marginBottom: 5,       // 🔹 más pegado al logo
     fontWeight: '500',
   },
   enovaLogo: {
