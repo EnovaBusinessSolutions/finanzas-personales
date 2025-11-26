@@ -1,14 +1,12 @@
 // mobile/src/screens/AuthScreen.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
+  SafeAreaView,
+  Image,
 } from 'react-native';
 import { COLORS } from '../theme/colors';
 
@@ -16,307 +14,184 @@ type Props = {
   onAuthSuccess: () => void;
 };
 
-type Mode = 'login' | 'register';
-
 const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
-  const [mode, setMode] = useState<Mode>('login');
+  const handleCreateAccount = () => {
+    // 🔹 Más adelante aquí iría la navegación a la pantalla de registro
+    onAuthSuccess(); // por ahora entra directo al app
+  };
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-
-  const isLogin = mode === 'login';
-
-  const handleSubmit = () => {
-    // TODO: aquí después conectaremos con tu backend real.
-    // Por ahora solo simulamos que todo salió bien.
-    onAuthSuccess();
+  const handleLogin = () => {
+    // 🔹 Más adelante aquí iría la navegación a la pantalla de login
+    onAuthSuccess(); // por ahora entra directo al app
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: COLORS.background }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* HERO tipo NU pero con tu branding */}
-        <View style={styles.hero}>
-          <Text style={styles.heroTag}>E-NOVA FINANCE</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        {/* HEADER: logo arriba izquierda */}
+        <View style={styles.headerRow}>
+          <View style={styles.logoRow}>
+            <Image
+              source={require('../../assets/app-logo.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <Text style={styles.brandText}>E-nova Finance</Text>
+          </View>
+
+          {/* Si luego quieres un selector de país como NU, lo ponemos aquí */}
+          {/* <TouchableOpacity style={styles.countryPill}>
+            <Text style={styles.countryText}>México ▾</Text>
+          </TouchableOpacity> */}
+        </View>
+
+        {/* HERO COPY */}
+        <View style={styles.heroBlock}>
           <Text style={styles.heroTitle}>
-            Las finanzas claras deberían ser lo normal.
+            La educación financiera{'\n'}es la clave del éxito.
           </Text>
           <Text style={styles.heroSubtitle}>
-            Administra tus cuentas, alertas y metas desde un solo lugar.
+            Aprende a administrar tu dinero, metas y alertas desde un solo
+            lugar, sin complicarte.
           </Text>
         </View>
 
-        {/* Card principal de auth */}
-        <View style={styles.card}>
-          {/* Segment control modo NU: Crear cuenta / Iniciar sesión */}
-          <View style={styles.segmentContainer}>
-            <TouchableOpacity
-              style={[
-                styles.segmentButton,
-                !isLogin && styles.segmentButtonActive,
-              ]}
-              onPress={() => setMode('register')}
-            >
-              <Text
-                style={[
-                  styles.segmentText,
-                  !isLogin && styles.segmentTextActive,
-                ]}
-              >
-                Crear cuenta
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.segmentButton,
-                isLogin && styles.segmentButtonActive,
-              ]}
-              onPress={() => setMode('login')}
-            >
-              <Text
-                style={[
-                  styles.segmentText,
-                  isLogin && styles.segmentTextActive,
-                ]}
-              >
-                Iniciar sesión
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Título del formulario */}
-          <Text style={styles.formTitle}>
-            {isLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta financiera'}
-          </Text>
-          <Text style={styles.formSubtitle}>
-            {isLogin
-              ? 'Ingresa con tu correo y contraseña.'
-              : 'Toma menos de un minuto empezar.'}
-          </Text>
-
-          {/* Campos */}
-          {!isLogin && (
-            <View style={{ marginBottom: 12 }}>
-              <Text style={styles.label}>Nombre completo</Text>
-              <TextInput
-                placeholder="Tu nombre"
-                placeholderTextColor="#9ca3af"
-                style={styles.input}
-                value={name}
-                onChangeText={setName}
-              />
-            </View>
-          )}
-
-          <View style={{ marginBottom: 12 }}>
-            <Text style={styles.label}>Correo electrónico</Text>
-            <TextInput
-              placeholder="correo@ejemplo.com"
-              placeholderTextColor="#9ca3af"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-            />
-          </View>
-
-          <View style={{ marginBottom: 12 }}>
-            <Text style={styles.label}>Contraseña</Text>
-            <TextInput
-              placeholder="••••••••"
-              placeholderTextColor="#9ca3af"
-              secureTextEntry
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-            />
-          </View>
-
-          {!isLogin && (
-            <View style={{ marginBottom: 16 }}>
-              <Text style={styles.label}>Confirmar contraseña</Text>
-              <TextInput
-                placeholder="Repite tu contraseña"
-                placeholderTextColor="#9ca3af"
-                secureTextEntry
-                style={styles.input}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-              />
-            </View>
-          )}
-
-          {/* Botón principal tipo NU */}
-          <TouchableOpacity style={styles.primaryButton} onPress={handleSubmit}>
-            <Text style={styles.primaryButtonText}>
-              {isLogin ? 'Entrar' : 'Continuar'}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Link secundario para cambiar de modo */}
+        {/* CTA PRINCIPAL */}
+        <View style={styles.actionsBlock}>
           <TouchableOpacity
-            style={styles.secondaryLink}
-            onPress={() => setMode(isLogin ? 'register' : 'login')}
+            style={styles.primaryButton}
+            onPress={handleCreateAccount}
+            activeOpacity={0.9}
           >
-            <Text style={styles.secondaryLinkText}>
-              {isLogin
-                ? '¿Aún no tienes cuenta? Crear cuenta'
-                : '¿Ya tienes cuenta? Inicia sesión'}
+            <Text style={styles.primaryButtonText}>
+              Continuar o empezar registro
             </Text>
           </TouchableOpacity>
 
-          {/* Aviso legal */}
-          {!isLogin && (
-            <Text style={styles.legalText}>
-              Al continuar aceptas nuestros Términos y el Aviso de privacidad.
-            </Text>
-          )}
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={handleLogin}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.secondaryButtonText}>Iniciar sesión</Text>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+        {/* FOOTER LEGAL */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            Al continuar, aceptas nuestros{' '}
+            <Text style={styles.footerLink}>Términos</Text> y{' '}
+            <Text style={styles.footerLink}>Aviso de privacidad</Text>.
+          </Text>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  content: {
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  container: {
+    flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 40,
-    paddingBottom: 32,
+    paddingTop: 12,
   },
-  hero: {
-    marginBottom: 28,
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 32,
   },
-  heroTag: {
-    fontSize: 13,
-    letterSpacing: 4,
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 32,
+    height: 32,
+    marginRight: 8,
+  },
+  brandText: {
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 2,
     textTransform: 'uppercase',
     color: COLORS.muted,
-    marginBottom: 8,
+  },
+  // countryPill: {
+  //   paddingHorizontal: 14,
+  //   paddingVertical: 8,
+  //   borderRadius: 999,
+  //   backgroundColor: 'rgba(255,255,255,0.28)',
+  // },
+  // countryText: {
+  //   fontSize: 13,
+  //   color: COLORS.card,
+  //   fontWeight: '500',
+  // },
+
+  heroBlock: {
+    marginBottom: 40,
   },
   heroTitle: {
-    fontSize: 28,
+    fontSize: 32,
+    lineHeight: 38,
     fontWeight: '800',
     color: COLORS.text,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   heroSubtitle: {
-    fontSize: 14,
-    color: COLORS.muted,
-    lineHeight: 20,
-  },
-
-  card: {
-    backgroundColor: COLORS.card,
-    borderRadius: 28,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
-  },
-
-  segmentContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#e5edf5',
-    borderRadius: 999,
-    padding: 4,
-    marginBottom: 18,
-  },
-  segmentButton: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  segmentButtonActive: {
-    backgroundColor: COLORS.card,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  segmentText: {
-    fontSize: 13,
-    fontWeight: '500',
+    fontSize: 15,
+    lineHeight: 22,
     color: COLORS.muted,
   },
-  segmentTextActive: {
-    color: COLORS.text,
-    fontWeight: '700',
-  },
 
-  formTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: 4,
+  actionsBlock: {
+    marginTop: 12,
   },
-  formSubtitle: {
-    fontSize: 13,
-    color: COLORS.muted,
-    marginBottom: 16,
-  },
-
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  input: {
-    height: 46,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    backgroundColor: '#f4f6fb',
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    fontSize: 14,
-    color: COLORS.text,
-  },
-
   primaryButton: {
-    marginTop: 4,
     backgroundColor: COLORS.primary,
     borderRadius: 999,
-    paddingVertical: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 14,
   },
   primaryButtonText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '700',
+    color: COLORS.card,
+    fontSize: 16,
+    fontWeight: '600',
   },
-
-  secondaryLink: {
-    marginTop: 14,
+  secondaryButton: {
     alignItems: 'center',
+    paddingVertical: 10,
   },
-  secondaryLinkText: {
-    fontSize: 13,
-    color: COLORS.muted,
+  secondaryButtonText: {
+    fontSize: 16,
+    color: COLORS.text,
+    fontWeight: '500',
   },
 
-  legalText: {
-    marginTop: 10,
-    fontSize: 11,
+  footer: {
+    marginTop: 'auto',
+    marginBottom: 24,
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  footerText: {
+    fontSize: 12,
+    lineHeight: 18,
     color: COLORS.muted,
     textAlign: 'center',
-    lineHeight: 16,
+  },
+  footerLink: {
+    color: COLORS.text,
+    fontWeight: '600',
   },
 });
 
