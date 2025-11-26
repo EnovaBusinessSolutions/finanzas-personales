@@ -9,11 +9,11 @@ type Props = {
 
 // Medidas aproximadas tipo WhatsApp
 const { width, height } = Dimensions.get('window');
-const ICON_SIZE = width * 0.30;      // icono ~30% del ancho
+const ICON_SIZE = width * 0.30; // icono ~30% del ancho
 
-// 🔹 AUMENTAMOS el tamaño del logo E-nova y ajustamos proporción
-const ENOVA_WIDTH = width * 0.42;          // antes 0.32
-const ENOVA_HEIGHT = ENOVA_WIDTH * 0.26;   // un poco más alto
+// 🔹 Logo E-nova grande, estilo “Meta”
+const ENOVA_WIDTH = width * 0.50;         // antes 0.42 → más ancho
+const ENOVA_HEIGHT = ENOVA_WIDTH * 0.24;  // proporción horizontal
 
 // Cargamos las imágenes una sola vez
 const appLogo = require('../../assets/app-logo.png');     // cerdito
@@ -68,9 +68,9 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.09, // posición parecida a WhatsApp
   },
   fromLabel: {
-    fontSize: 18,          // 🔹 antes 16, ahora más grande
+    fontSize: 18,          // texto “from” grande
     color: COLORS.muted,
-    marginBottom: 6,       // un poco más de espacio
+    marginBottom: 2,       // 🔹 más pegado al logo
     fontWeight: '500',
   },
   enovaLogo: {
