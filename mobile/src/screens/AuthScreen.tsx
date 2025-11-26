@@ -24,6 +24,9 @@ const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
     onAuthSuccess();
   };
 
+  // Año actual para los créditos
+  const currentYear = new Date().getFullYear();
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -64,12 +67,10 @@ const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
           </View>
         </View>
 
-        {/* FOOTER LEGAL */}
+        {/* FOOTER CRÉDITOS */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Al continuar, aceptas nuestros{' '}
-            <Text style={styles.footerLink}>Términos</Text> y{' '}
-            <Text style={styles.footerLink}>Aviso de privacidad</Text>.
+            HappyLife © {currentYear}
           </Text>
         </View>
       </View>
@@ -143,14 +144,11 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   footerText: {
-    fontSize: 12,
+    fontSize: 13,
     lineHeight: 18,
     color: COLORS.muted,
     textAlign: 'center',
-  },
-  footerLink: {
-    color: COLORS.text,
-    fontWeight: '600',
+    fontWeight: '500',
   },
 });
 
