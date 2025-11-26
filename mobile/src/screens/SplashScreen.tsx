@@ -1,32 +1,49 @@
 // mobile/src/screens/SplashScreen.tsx
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 import { COLORS } from '../theme/colors';
 
 type Props = {
   onFinish: () => void;
 };
 
+// Medidas aproximadas tipo WhatsApp
+const { width, height } = Dimensions.get('window');
+const ICON_SIZE = width * 0.30;      // icono ~30% del ancho
+
+// 🔹 AUMENTAMOS el tamaño del logo E-nova y ajustamos proporción
+const ENOVA_WIDTH = width * 0.42;          // antes 0.32
+const ENOVA_HEIGHT = ENOVA_WIDTH * 0.26;   // un poco más alto
+
+// Cargamos las imágenes una sola vez
+const appLogo = require('../../assets/app-logo.png');     // cerdito
+const enovaLogo = require('../../assets/enova-logo.png'); // logo E-nova
+
 const SplashScreen: React.FC<Props> = ({ onFinish }) => {
   useEffect(() => {
-    // ⏱ Tiempo que se muestra el splash antes de ir a Auth
-    const timeout = setTimeout(onFinish, 1800);
-    return () => clearTimeout(timeout);
+    const timer = setTimeout(onFinish, 2200); // tiempo en pantalla
+    return () => clearTimeout(timer);
   }, [onFinish]);
 
   return (
     <View style={styles.container}>
-      {/* Logo cerdito */}
-      <Image
-        source={require('../../assets/app-logo.png')}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+      {/* Icono de la app (cerdito) centrado */}
+      <View style={styles.centerContent}>
+        <Image
+          source={appLogo}
+          style={styles.appIcon}
+          resizeMode="contain"
+        />
+      </View>
 
-      {/* from E-NOVA (más grande) */}
+      {/* “from E-NOVA” abajo, estilo WhatsApp */}
       <View style={styles.footer}>
-        <Text style={styles.fromText}>from</Text>
-        <Text style={styles.brandText}>E-NOVA</Text>
+        <Text style={styles.fromLabel}>from</Text>
+        <Image
+          source={enovaLogo}
+          style={styles.enovaLogo}
+          resizeMode="contain"
+        />
       </View>
     </View>
   );
@@ -35,29 +52,30 @@ const SplashScreen: React.FC<Props> = ({ onFinish }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: COLORS.background, // mismo fondo que la app
   },
-  logo: {
-    width: 160,   // el cerdito ya te gusta así, lo dejamos en este rango
-    height: 160,
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  appIcon: {
+    width: ICON_SIZE,
+    height: ICON_SIZE,
   },
   footer: {
-    position: 'absolute',
-    bottom: 64, // un poco arriba del borde inferior
     alignItems: 'center',
+    marginBottom: height * 0.09, // posición parecida a WhatsApp
   },
-  fromText: {
-    fontSize: 18,          // ⬅️ más grande, similar a “from” de WhatsApp
+  fromLabel: {
+    fontSize: 18,          // 🔹 antes 16, ahora más grande
     color: COLORS.muted,
-    marginBottom: 4,
+    marginBottom: 6,       // un poco más de espacio
+    fontWeight: '500',
   },
-  brandText: {
-    fontSize: 20,          // ⬅️ nombre más grande
-    letterSpacing: 2,      // look más de “marca”
-    color: COLORS.primary, // azul de tu app
-    fontWeight: '600',
+  enovaLogo: {
+    width: ENOVA_WIDTH,
+    height: ENOVA_HEIGHT,
   },
 });
 
