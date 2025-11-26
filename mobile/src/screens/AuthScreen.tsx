@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  Image,
 } from 'react-native';
 import { COLORS } from '../theme/colors';
 
@@ -16,65 +15,51 @@ type Props = {
 
 const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
   const handleCreateAccount = () => {
-    // 🔹 Más adelante aquí iría la navegación a la pantalla de registro
-    onAuthSuccess(); // por ahora entra directo al app
+    // Más adelante aquí irán las pantallas reales de registro
+    onAuthSuccess();
   };
 
   const handleLogin = () => {
-    // 🔹 Más adelante aquí iría la navegación a la pantalla de login
-    onAuthSuccess(); // por ahora entra directo al app
+    // Más adelante aquí irán las pantallas reales de login
+    onAuthSuccess();
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* HEADER: logo arriba izquierda */}
-        <View style={styles.headerRow}>
-          <View style={styles.logoRow}>
-            <Image
-              source={require('../../assets/app-logo.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-            <Text style={styles.brandText}>E-nova Finance</Text>
+        {/* Bloque central: copy + botones */}
+        <View style={styles.content}>
+          {/* HERO COPY */}
+          <View style={styles.heroBlock}>
+            <Text style={styles.heroTitle}>
+              La educación financiera{'\n'}es la clave del éxito.
+            </Text>
+            <Text style={styles.heroSubtitle}>
+              Aprende a administrar tu dinero, metas y alertas desde un solo
+              lugar, sin complicarte.
+            </Text>
           </View>
 
-          {/* Si luego quieres un selector de país como NU, lo ponemos aquí */}
-          {/* <TouchableOpacity style={styles.countryPill}>
-            <Text style={styles.countryText}>México ▾</Text>
-          </TouchableOpacity> */}
-        </View>
+          {/* BOTONES (más abajo, a altura del dedo) */}
+          <View style={styles.actionsBlock}>
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={handleCreateAccount}
+              activeOpacity={0.9}
+            >
+              <Text style={styles.primaryButtonText}>
+                Continuar o empezar registro
+              </Text>
+            </TouchableOpacity>
 
-        {/* HERO COPY */}
-        <View style={styles.heroBlock}>
-          <Text style={styles.heroTitle}>
-            La educación financiera{'\n'}es la clave del éxito.
-          </Text>
-          <Text style={styles.heroSubtitle}>
-            Aprende a administrar tu dinero, metas y alertas desde un solo
-            lugar, sin complicarte.
-          </Text>
-        </View>
-
-        {/* CTA PRINCIPAL */}
-        <View style={styles.actionsBlock}>
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={handleCreateAccount}
-            activeOpacity={0.9}
-          >
-            <Text style={styles.primaryButtonText}>
-              Continuar o empezar registro
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={handleLogin}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.secondaryButtonText}>Iniciar sesión</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={handleLogin}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.secondaryButtonText}>Iniciar sesión</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* FOOTER LEGAL */}
@@ -98,51 +83,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 12,
+    paddingTop: 24,
+    paddingBottom: 24,
   },
-  headerRow: {
-    flexDirection: 'row',
+
+  // distribuye hero y botones verticalmente
+  content: {
+    flex: 1,
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 32,
   },
-  logoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logo: {
-    width: 32,
-    height: 32,
-    marginRight: 8,
-  },
-  brandText: {
-    fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    color: COLORS.muted,
-  },
-  // countryPill: {
-  //   paddingHorizontal: 14,
-  //   paddingVertical: 8,
-  //   borderRadius: 999,
-  //   backgroundColor: 'rgba(255,255,255,0.28)',
-  // },
-  // countryText: {
-  //   fontSize: 13,
-  //   color: COLORS.card,
-  //   fontWeight: '500',
-  // },
 
   heroBlock: {
-    marginBottom: 40,
+    marginTop: 40, // separa el texto de la barra de estado
+    marginRight: 16,
   },
   heroTitle: {
-    fontSize: 32,
-    lineHeight: 38,
+    fontSize: 34, // 🔹 más grande
+    lineHeight: 40,
     fontWeight: '800',
     color: COLORS.text,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   heroSubtitle: {
     fontSize: 15,
@@ -151,7 +111,7 @@ const styles = StyleSheet.create({
   },
 
   actionsBlock: {
-    marginTop: 12,
+    marginBottom: 16, // 🔹 empuja los botones hacia la parte baja
   },
   primaryButton: {
     backgroundColor: COLORS.primary,
@@ -178,8 +138,6 @@ const styles = StyleSheet.create({
   },
 
   footer: {
-    marginTop: 'auto',
-    marginBottom: 24,
     alignItems: 'center',
     paddingHorizontal: 10,
   },
