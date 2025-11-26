@@ -7,7 +7,6 @@ import Dashboard from './src/screens/Dashboard';
 import SettingsScreen from './src/screens/Settings';
 import SplashScreen from './src/screens/SplashScreen';
 import AuthScreen from './src/screens/AuthScreen';
-import AppLoadingScreen from './src/screens/AppLoadingScreen';
 
 import BottomMenu, { BottomTabKey } from './src/components/BottomMenu';
 import { COLORS } from './src/theme/colors';
@@ -16,10 +15,9 @@ import { LanguageProvider } from './src/context/LanguageContext';
 export default function App() {
   const [activeTab, setActiveTab] = useState<BottomTabKey>('home');
 
-  // 👉 flujo de arranque
-  const [isSplashDone, setIsSplashDone] = useState(false);        // Pantalla E-nova
-  const [isAppLoadingDone, setIsAppLoadingDone] = useState(false); // Logo + barra 0–100%
-  const [isAuthenticated, setIsAuthenticated] = useState(false);   // Login/registro
+  // 👉 flujo simple: Splash único -> Auth -> App
+  const [isSplashDone, setIsSplashDone] = useState(false);      // Pantalla tipo WhatsApp
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Login/registro
 
   // Splash negro sólo mientras se muestra la pantalla de E-nova
   const isSplashVisible = !isSplashDone;
@@ -45,7 +43,7 @@ export default function App() {
       <SafeAreaView
         style={{
           flex: 1,
-          // 🔹 Negro absoluto mientras se muestra el splash de E-nova
+          // 🔹 Negro absoluto mientras se muestra el splash
           backgroundColor: isSplashVisible ? '#000000' : COLORS.background,
         }}
       >
@@ -56,23 +54,18 @@ export default function App() {
           backgroundColor={isSplashVisible ? '#000000' : COLORS.background}
         />
 
-        {/* 1) Splash con logo E-nova */}
+        {/* 1) Splash único con logo cerdito + “from E-nova” */}
         {!isSplashDone && (
           <SplashScreen onFinish={() => setIsSplashDone(true)} />
         )}
 
-        {/* 2) Pantalla de carga de la app (logo Happy Life + barra 0–100%) */}
-        {isSplashDone && !isAppLoadingDone && (
-          <AppLoadingScreen onFinish={() => setIsAppLoadingDone(true)} />
-        )}
-
-        {/* 3) Pantalla de auth (login/registro) */}
-        {isSplashDone && isAppLoadingDone && !isAuthenticated && (
+        {/* 2) Pantalla de auth (inicio de sesión / registro) */}
+        {isSplashDone && !isAuthenticated && (
           <AuthScreen onAuthSuccess={() => setIsAuthenticated(true)} />
         )}
 
-        {/* 4) App principal con bottom nav */}
-        {isSplashDone && isAppLoadingDone && isAuthenticated && (
+        {/* 3) App principal con bottom nav */}
+        {isSplashDone && isAuthenticated && (
           <>
             <View style={{ flex: 1 }}>{renderMainContent()}</View>
 
