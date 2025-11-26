@@ -1,36 +1,44 @@
 // mobile/src/screens/SplashScreen.tsx
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 import { COLORS } from '../theme/colors';
 
 type Props = {
   onFinish: () => void;
 };
 
+// Medidas aproximadas tipo WhatsApp
+const { width, height } = Dimensions.get('window');
+const ICON_SIZE = width * 0.30;      // icono ~30% del ancho
+const ENOVA_WIDTH = width * 0.32;    // ancho del logo E-nova
+const ENOVA_HEIGHT = ENOVA_WIDTH * 0.22; // proporción aprox. horizontal
+
+// Cargamos las imágenes una sola vez
+const appLogo = require('../../assets/app-logo.png');    // cerdito
+const enovaLogo = require('../../assets/enova-logo.png'); // logo E-nova
+
 const SplashScreen: React.FC<Props> = ({ onFinish }) => {
-  // Sólo controlamos cuánto tiempo se muestra la pantalla,
-  // pero los logos se pintan INMEDIATAMENTE.
   useEffect(() => {
-    const timer = setTimeout(onFinish, 2200); // ~2.2s de splash
+    const timer = setTimeout(onFinish, 2200); // tiempo en pantalla
     return () => clearTimeout(timer);
   }, [onFinish]);
 
   return (
     <View style={styles.container}>
-      {/* Logo principal de la app (cerdito) */}
+      {/* Icono de la app (cerdito) centrado */}
       <View style={styles.centerContent}>
         <Image
-          source={require('../../assets/app-logo.png')}
-          style={styles.appLogo}
+          source={appLogo}
+          style={styles.appIcon}
           resizeMode="contain"
         />
       </View>
 
-      {/* Footer "from E-nova" con logo real */}
+      {/* “from E-NOVA” abajo, estilo WhatsApp */}
       <View style={styles.footer}>
-        <Text style={styles.footerFrom}>from</Text>
+        <Text style={styles.fromLabel}>from</Text>
         <Image
-          source={require('../../assets/enova-logo.png')}
+          source={enovaLogo}
           style={styles.enovaLogo}
           resizeMode="contain"
         />
@@ -42,33 +50,29 @@ const SplashScreen: React.FC<Props> = ({ onFinish }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background, // mismo color que la app
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 80,
-    paddingBottom: 40,
+    backgroundColor: COLORS.background, // mismo fondo que la app
   },
   centerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  appLogo: {
-    width: 220,
-    height: 220,
+  appIcon: {
+    width: ICON_SIZE,
+    height: ICON_SIZE,
   },
   footer: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: height * 0.09, // posición parecida a WhatsApp
   },
-  footerFrom: {
-    fontSize: 15,
+  fromLabel: {
+    fontSize: 16,
     color: COLORS.muted,
     marginBottom: 4,
   },
   enovaLogo: {
-    height: 26,
-    width: 150, // tamaño similar a "from Meta"
+    width: ENOVA_WIDTH,
+    height: ENOVA_HEIGHT,
   },
 });
 
