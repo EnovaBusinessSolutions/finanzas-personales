@@ -40,7 +40,7 @@ const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
             </Text>
           </View>
 
-          {/* BOTONES (más abajo, a altura del dedo) */}
+          {/* BOTONES (un poco más arriba en Y) */}
           <View style={styles.actionsBlock}>
             <TouchableOpacity
               style={styles.primaryButton}
@@ -87,18 +87,18 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
 
-  // distribuye hero y botones verticalmente
+  // Ahora controlamos el espacio manualmente
   content: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
 
   heroBlock: {
-    marginTop: 40, // separa el texto de la barra de estado
+    marginTop: 48,   // separa bien del notch
     marginRight: 16,
   },
   heroTitle: {
-    fontSize: 34, // 🔹 más grande
+    fontSize: 34,
     lineHeight: 40,
     fontWeight: '800',
     color: COLORS.text,
@@ -110,8 +110,9 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
   },
 
+  // Botones más centrados verticalmente
   actionsBlock: {
-    marginBottom: 16, // 🔹 empuja los botones hacia la parte baja
+    marginTop: 56,   // 🔹 sube/baja el bloque de botones
   },
   primaryButton: {
     backgroundColor: COLORS.primary,
@@ -140,6 +141,7 @@ const styles = StyleSheet.create({
   footer: {
     alignItems: 'center',
     paddingHorizontal: 10,
+    marginTop: 24,
   },
   footerText: {
     fontSize: 12,
