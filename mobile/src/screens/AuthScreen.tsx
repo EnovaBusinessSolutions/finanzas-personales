@@ -11,12 +11,13 @@ import { COLORS } from '../theme/colors';
 
 type Props = {
   onAuthSuccess: () => void;
+  onGoToRegister: () => void;   // 🔹 nuevo prop para ir al registro
 };
 
-const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
+const AuthScreen: React.FC<Props> = ({ onAuthSuccess, onGoToRegister }) => {
   const handleCreateAccount = () => {
-    // Aquí después irán las pantallas reales de registro
-    onAuthSuccess();
+    // Ahora navegamos a la pantalla de registro
+    onGoToRegister();
   };
 
   const handleLogin = () => {
