@@ -8,24 +8,32 @@ type Props = {
 };
 
 const SplashScreen: React.FC<Props> = ({ onFinish }) => {
+  // Sólo controlamos cuánto tiempo se muestra la pantalla,
+  // pero los logos se pintan INMEDIATAMENTE.
   useEffect(() => {
-    const timer = setTimeout(onFinish, 2200); // ~2.2s como WhatsApp
+    const timer = setTimeout(onFinish, 2200); // ~2.2s de splash
     return () => clearTimeout(timer);
   }, [onFinish]);
 
   return (
     <View style={styles.container}>
-      {/* Logo principal al centro */}
-      <Image
-        source={require('../../assets/app-logo.png')}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+      {/* Logo principal de la app (cerdito) */}
+      <View style={styles.centerContent}>
+        <Image
+          source={require('../../assets/app-logo.png')}
+          style={styles.appLogo}
+          resizeMode="contain"
+        />
+      </View>
 
-      {/* "from E-nova" tipo WhatsApp/Meta */}
+      {/* Footer "from E-nova" con logo real */}
       <View style={styles.footer}>
-        <Text style={styles.fromText}>from</Text>
-        <Text style={styles.brandText}>E-nova</Text>
+        <Text style={styles.footerFrom}>from</Text>
+        <Image
+          source={require('../../assets/enova-logo.png')}
+          style={styles.enovaLogo}
+          resizeMode="contain"
+        />
       </View>
     </View>
   );
@@ -34,31 +42,33 @@ const SplashScreen: React.FC<Props> = ({ onFinish }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // 🔹 mismo fondo suave que el resto de la app, ya NO negro
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.background, // mismo color que la app
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 80,
+    paddingBottom: 40,
   },
-  logo: {
-    width: 160,
-    height: 160,
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  appLogo: {
+    width: 220,
+    height: 220,
   },
   footer: {
-    position: 'absolute',
-    bottom: 48, // un poco más arriba del borde
     alignItems: 'center',
+    marginBottom: 16,
   },
-  fromText: {
-    fontSize: 16,          // más grande
-    color: COLORS.muted,   // gris suave
+  footerFrom: {
+    fontSize: 15,
+    color: COLORS.muted,
     marginBottom: 4,
   },
-  brandText: {
-    fontSize: 20,          // similar al "Meta" de la captura
-    fontWeight: '600',
-    letterSpacing: 2,
-    color: COLORS.text,    // mismo azul/negro de tus títulos
-    textTransform: 'uppercase',
+  enovaLogo: {
+    height: 26,
+    width: 150, // tamaño similar a "from Meta"
   },
 });
 
