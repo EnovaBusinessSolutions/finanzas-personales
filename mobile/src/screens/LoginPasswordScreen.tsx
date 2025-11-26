@@ -27,18 +27,17 @@ type RootStackParamList = {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LoginPassword'>;
 
-const ACCENT = '#A855F7'; // moradito tipo NU
+const ACCENT = '#A855F7'; // moradito para el enlace
 
 const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [secure, setSecure] = useState(true);
-  const [isFocused, setIsFocused] = useState(false);
 
   const isValidPassword = (value: string) => value.trim().length >= 8;
 
   const handleNext = () => {
     if (!isValidPassword(password)) return;
-    // Aquí luego validarás contra backend; por ahora entra al Dashboard
+    // Luego aqui validas contra backend; por ahora, entra al Dashboard
     navigation.replace('Dashboard');
   };
 
@@ -52,7 +51,7 @@ const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.container}>
-            {/* Header superior (back) */}
+            {/* Header superior (flecha atrás) */}
             <View style={styles.headerRow}>
               <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Ionicons
@@ -63,54 +62,42 @@ const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
               </TouchableOpacity>
             </View>
 
-            {/* Título grande */}
+            {/* Título grande, mismo estilo que correo */}
             <View style={styles.titleBlock}>
               <Text style={styles.title}>
                 Ahora ingresa tu{'\n'}contraseña del app
               </Text>
             </View>
 
-            {/* Campo de contraseña tipo NU */}
+            {/* Campo de contraseña en la misma línea visual que el de correo */}
             <View style={styles.inputWrapper}>
               <View style={styles.inputRow}>
-                {/* barrita de color a la izquierda */}
-                <View
-                  style={[
-                    styles.indicator,
-                    (isFocused || password.length > 0) && {
-                      backgroundColor: ACCENT,
-                    },
-                  ]}
-                />
-
                 <TextInput
                   style={styles.input}
                   value={password}
                   onChangeText={setPassword}
                   placeholder="8 dígitos o más"
-                  placeholderTextColor="#B3B3B3"
+                  placeholderTextColor={COLORS.muted}
                   secureTextEntry={secure}
                   autoCapitalize="none"
                   autoCorrect={false}
-                  selectionColor={ACCENT}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setIsFocused(false)}
+                  selectionColor={COLORS.primary}
                 />
 
-                {/* ojo mostrar/ocultar */}
+                {/* Ojo mostrar/ocultar */}
                 <TouchableOpacity
-                  onPress={() => setSecure((prev) => !prev)}
+                  onPress={() => setSecure(prev => !prev)}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   <Ionicons
                     name={secure ? 'eye-off-outline' : 'eye-outline'}
                     size={22}
-                    color="#666666"
+                    color={COLORS.muted}
                   />
                 </TouchableOpacity>
               </View>
 
-              {/* línea inferior */}
+              {/* Línea inferior igual que en correo */}
               <View style={styles.bottomLine} />
             </View>
 
@@ -118,7 +105,7 @@ const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
             <TouchableOpacity
               style={styles.forgotWrapper}
               onPress={() => {
-                // aquí luego puedes navegar a un flujo de recuperación
+                // Aquí luego metemos flujo de recuperación
               }}
             >
               <Text style={styles.forgotText}>
@@ -126,7 +113,7 @@ const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
 
-            {/* Botón flotante de flecha */}
+            {/* Botón flotante de flecha (igual que en correo) */}
             <TouchableOpacity
               style={[styles.fab, !canContinue && styles.fabDisabled]}
               onPress={handleNext}
@@ -172,29 +159,22 @@ const styles = StyleSheet.create({
     lineHeight: 36,
   },
   inputWrapper: {
-    marginTop: 40,
+    marginTop: 32,
     paddingHorizontal: 20,
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  indicator: {
-    width: 3,
-    height: 28,
-    borderRadius: 2,
-    marginRight: 8,
-    backgroundColor: '#E5E7EB',
-  },
   input: {
     flex: 1,
     fontSize: 18,
-    paddingVertical: 4,
+    paddingVertical: 10,
     color: COLORS.text,
   },
   bottomLine: {
     marginTop: 4,
-    height: 1,
+    height: 2,
     backgroundColor: '#E5E7EB',
   },
   forgotWrapper: {
