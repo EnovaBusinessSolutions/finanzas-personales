@@ -9,6 +9,7 @@ import SplashScreen from './src/screens/SplashScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import RegisterScreen from './src/screens/RegisterScreen'; // 🔹 registro
 import LoginEmailScreen from './src/screens/LoginEmailScreen'; // 🔹 nueva pantalla login
+import LoginPasswordScreen from './src/screens/LoginPasswordScreen'; // 🔹 pantalla contraseña
 
 import BottomMenu, { BottomTabKey } from './src/components/BottomMenu';
 import { COLORS } from './src/theme/colors';
@@ -22,8 +23,9 @@ export type RootStackParamList = {
   Splash: undefined;
   Auth: undefined;
   LoginEmail: undefined;
+  LoginPassword: undefined;    // 👈 aquí también
   Register: undefined;
-  Dashboard: undefined; // aquí vive el layout con BottomMenu
+  Dashboard: undefined;        // aquí vive el layout con BottomMenu
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -101,7 +103,13 @@ export default function App() {
                   component={LoginEmailScreen}
                 />
 
-                {/* 2C) Pantalla de registro tipo NU (usa tus props actuales) */}
+                {/* 2C) Pantalla de contraseña tipo NU */}
+                <Stack.Screen
+                  name="LoginPassword"
+                  component={LoginPasswordScreen}
+                />
+
+                {/* 2D) Pantalla de registro tipo NU (usa tus props actuales) */}
                 <Stack.Screen name="Register">
                   {({ navigation }) => (
                     <RegisterScreen

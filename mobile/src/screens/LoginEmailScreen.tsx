@@ -22,6 +22,7 @@ type RootStackParamList = {
   Register: undefined;
   LoginEmail: undefined;
   Dashboard: undefined;
+  LoginPassword: undefined;
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LoginEmail'>;
@@ -36,9 +37,10 @@ const LoginEmailScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleNext = () => {
-    if (!isValidEmail(email)) return;
-    navigation.replace('Dashboard');
-  };
+  if (!isValidEmail(email)) return;
+  navigation.navigate('LoginPassword');
+};
+
 
   const canContinue = isValidEmail(email);
 
