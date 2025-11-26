@@ -1,6 +1,7 @@
 // mobile/src/screens/SplashScreen.tsx
 import React, { useEffect } from 'react';
-import { View, Image, StyleSheet, Text } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import { COLORS } from '../theme/colors';
 
 type Props = {
   onFinish: () => void;
@@ -8,27 +9,23 @@ type Props = {
 
 const SplashScreen: React.FC<Props> = ({ onFinish }) => {
   useEffect(() => {
-    const timeout = setTimeout(onFinish, 2200); // ⬅️ tiempo en pantalla ~2.2s
-    return () => clearTimeout(timeout);
+    const timer = setTimeout(onFinish, 2200); // ~2.2s como WhatsApp
+    return () => clearTimeout(timer);
   }, [onFinish]);
 
   return (
     <View style={styles.container}>
-      {/* Logo principal de la app al centro */}
+      {/* Logo principal al centro */}
       <Image
-        source={require('../../assets/app-logo.png')} // cerdito
-        style={styles.mainLogo}
+        source={require('../../assets/app-logo.png')}
+        style={styles.logo}
         resizeMode="contain"
       />
 
-      {/* Footer "from E-nova" al fondo, tipo WhatsApp */}
+      {/* "from E-nova" tipo WhatsApp/Meta */}
       <View style={styles.footer}>
         <Text style={styles.fromText}>from</Text>
-        <Image
-          source={require('../../assets/enova-logo.png')} // logo E-nova en pequeño
-          style={styles.brandLogo}
-          resizeMode="contain"
-        />
+        <Text style={styles.brandText}>E-nova</Text>
       </View>
     </View>
   );
@@ -37,28 +34,31 @@ const SplashScreen: React.FC<Props> = ({ onFinish }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    // 🔹 mismo fondo suave que el resto de la app, ya NO negro
+    backgroundColor: COLORS.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  mainLogo: {
-    width: 140,
-    height: 140,
+  logo: {
+    width: 160,
+    height: 160,
   },
   footer: {
     position: 'absolute',
-    bottom: 48,
-    width: '100%',
+    bottom: 48, // un poco más arriba del borde
     alignItems: 'center',
   },
   fromText: {
-    fontSize: 14,
-    color: '#9ca3af',
+    fontSize: 16,          // más grande
+    color: COLORS.muted,   // gris suave
     marginBottom: 4,
   },
-  brandLogo: {
-    width: 90,
-    height: 24,
+  brandText: {
+    fontSize: 20,          // similar al "Meta" de la captura
+    fontWeight: '600',
+    letterSpacing: 2,
+    color: COLORS.text,    // mismo azul/negro de tus títulos
+    textTransform: 'uppercase',
   },
 });
 
