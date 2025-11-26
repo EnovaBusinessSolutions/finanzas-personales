@@ -15,12 +15,12 @@ type Props = {
 
 const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
   const handleCreateAccount = () => {
-    // Más adelante aquí irán las pantallas reales de registro
+    // Aquí después irán las pantallas reales de registro
     onAuthSuccess();
   };
 
   const handleLogin = () => {
-    // Más adelante aquí irán las pantallas reales de login
+    // Aquí después irán las pantallas reales de login
     onAuthSuccess();
   };
 
@@ -40,24 +40,26 @@ const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
             </Text>
           </View>
 
-          {/* BOTONES (un poco más arriba en Y) */}
+          {/* BOTONES (más abajo en el eje Y) */}
           <View style={styles.actionsBlock}>
+            {/* 🔹 Botón azul principal: Iniciar sesión */}
             <TouchableOpacity
               style={styles.primaryButton}
-              onPress={handleCreateAccount}
+              onPress={handleLogin}
               activeOpacity={0.9}
             >
-              <Text style={styles.primaryButtonText}>
-                Continuar o empezar registro
-              </Text>
+              <Text style={styles.primaryButtonText}>Iniciar sesión</Text>
             </TouchableOpacity>
 
+            {/* 🔹 Enlace secundario: registro */}
             <TouchableOpacity
               style={styles.secondaryButton}
-              onPress={handleLogin}
+              onPress={handleCreateAccount}
               activeOpacity={0.8}
             >
-              <Text style={styles.secondaryButtonText}>Iniciar sesión</Text>
+              <Text style={styles.secondaryButtonText}>
+                Continuar o empezar registro
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -86,15 +88,12 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 24,
   },
-
-  // Ahora controlamos el espacio manualmente
   content: {
     flex: 1,
     justifyContent: 'flex-start',
   },
-
   heroBlock: {
-    marginTop: 48,   // separa bien del notch
+    marginTop: 48,
     marginRight: 16,
   },
   heroTitle: {
@@ -110,9 +109,9 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
   },
 
-  // Botones más centrados verticalmente
+  // 🔹 Botones un poco más abajo
   actionsBlock: {
-    marginTop: 56,   // 🔹 sube/baja el bloque de botones
+    marginTop: 80, // antes 56 -> los baja más en el eje Y
   },
   primaryButton: {
     backgroundColor: COLORS.primary,
