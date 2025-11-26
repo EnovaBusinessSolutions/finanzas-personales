@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     alignItems: 'center',
-    marginBottom: height * 0.09, // posición parecida a WhatsApp
+    marginBottom: height * 5, // posición parecida a WhatsApp
   },
   fromLabel: {
     fontSize: 18,          // texto “from” grande
