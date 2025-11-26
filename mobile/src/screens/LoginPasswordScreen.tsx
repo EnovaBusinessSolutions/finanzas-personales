@@ -27,8 +27,6 @@ type RootStackParamList = {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LoginPassword'>;
 
-const ACCENT = '#A855F7'; // moradito para el enlace
-
 const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [secure, setSecure] = useState(true);
@@ -37,7 +35,9 @@ const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleNext = () => {
     if (!isValidPassword(password)) return;
-    // Luego aqui validas contra backend; por ahora, entra al Dashboard
+
+    // ✅ Cuando la contraseña es válida y el botón está habilitado,
+    // al tocar la flecha se va al Dashboard
     navigation.replace('Dashboard');
   };
 
@@ -69,7 +69,7 @@ const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
               </Text>
             </View>
 
-            {/* Campo de contraseña en la misma línea visual que el de correo */}
+            {/* Campo de contraseña */}
             <View style={styles.inputWrapper}>
               <View style={styles.inputRow}>
                 <TextInput
@@ -113,7 +113,7 @@ const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
 
-            {/* Botón flotante de flecha (igual que en correo) */}
+            {/* Botón flotante de flecha */}
             <TouchableOpacity
               style={[styles.fab, !canContinue && styles.fabDisabled]}
               onPress={handleNext}
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   },
   forgotText: {
     fontSize: 15,
-    color: ACCENT,
+    color: COLORS.primary, // 👈 ahora usa el color principal de tu app
     fontWeight: '600',
   },
   fab: {
