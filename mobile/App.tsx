@@ -7,22 +7,30 @@ import Dashboard from './src/screens/Dashboard';
 import SettingsScreen from './src/screens/Settings';
 import SplashScreen from './src/screens/SplashScreen';
 import AuthScreen from './src/screens/AuthScreen';
-import RegisterScreen from './src/screens/RegisterScreen'; // 🔹 nueva importación
+import RegisterScreen from './src/screens/RegisterScreen'; // 🔹 registro
+import LoginEmailScreen from './src/screens/LoginEmailScreen'; // 🔹 nueva pantalla login
 
 import BottomMenu, { BottomTabKey } from './src/components/BottomMenu';
 import { COLORS } from './src/theme/colors';
 import { LanguageProvider } from './src/context/LanguageContext';
 
-export default function App() {
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+// 🔹 Rutas de navegación principales
+export type RootStackParamList = {
+  Splash: undefined;
+  Auth: undefined;
+  LoginEmail: undefined;
+  Register: undefined;
+  Dashboard: undefined; // aquí vive el layout con BottomMenu
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+// 🔹 Layout principal (Dashboard + BottomMenu) usando tu estado de tabs
+const DashboardWrapper: React.FC = () => {
   const [activeTab, setActiveTab] = useState<BottomTabKey>('home');
-
-  // 👉 flujo simple: Splash único -> Auth/Register -> App
-  const [isSplashDone, setIsSplashDone] = useState(false);       // Pantalla tipo WhatsApp
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Login/registro
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login'); // 🔹 estado para elegir pantalla
-
-  // Splash negro sólo mientras se muestra la pantalla de splash
-  const isSplashVisible = !isSplashDone;
 
   const renderMainContent = () => {
     switch (activeTab) {
@@ -41,6 +49,25 @@ export default function App() {
   };
 
   return (
+    <>
+      <View style={{ flex: 1 }}>{renderMainContent()}</View>
+      <BottomMenu
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        colors={COLORS}
+      />
+    </>
+  );
+};
+
+export default function App() {
+  // 👉 flujo simple: Splash único -> Auth/Register/Login -> Dashboard
+  const [isSplashDone, setIsSplashDone] = useState(false); // Pantalla tipo WhatsApp
+
+  // Splash negro sólo mientras se muestra la pantalla de splash
+  const isSplashVisible = !isSplashDone;
+
+  return (
     <LanguageProvider>
       <SafeAreaView
         style={{
@@ -56,39 +83,45 @@ export default function App() {
           backgroundColor={isSplashVisible ? '#000000' : COLORS.background}
         />
 
-        {/* 1) Splash único con logo cerdito + “from E-nova” */}
-        {!isSplashDone && (
-          <SplashScreen onFinish={() => setIsSplashDone(true)} />
-        )}
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            {/* 1) Mientras no termine el splash, solo existe esta pantalla */}
+            {!isSplashDone ? (
+              <Stack.Screen name="Splash">
+                {() => <SplashScreen onFinish={() => setIsSplashDone(true)} />}
+              </Stack.Screen>
+            ) : (
+              <>
+                {/* 2A) Pantalla de auth (inicio) */}
+                <Stack.Screen name="Auth" component={AuthScreen} />
 
-        {/* 2A) Pantalla de auth (inicio de sesión) */}
-        {isSplashDone && !isAuthenticated && authMode === 'login' && (
-          <AuthScreen
-            onAuthSuccess={() => setIsAuthenticated(true)}
-            onGoToRegister={() => setAuthMode('register')} // 🔹 ir a registro
-          />
-        )}
+                {/* 2B) Pantalla de login por correo tipo NU */}
+                <Stack.Screen
+                  name="LoginEmail"
+                  component={LoginEmailScreen}
+                />
 
-        {/* 2B) Pantalla de registro tipo NU */}
-        {isSplashDone && !isAuthenticated && authMode === 'register' && (
-          <RegisterScreen
-            onRegisterSuccess={() => setIsAuthenticated(true)} // 🔹 después de registrar, entra directo
-            onBackToLogin={() => setAuthMode('login')}        // 🔹 volver a la pantalla de login
-          />
-        )}
+                {/* 2C) Pantalla de registro tipo NU (usa tus props actuales) */}
+                <Stack.Screen name="Register">
+                  {({ navigation }) => (
+                    <RegisterScreen
+                      // después de registrar, entra directo al dashboard
+                      onRegisterSuccess={() => navigation.replace('Dashboard')}
+                      // volver a Auth
+                      onBackToLogin={() => navigation.goBack()}
+                    />
+                  )}
+                </Stack.Screen>
 
-        {/* 3) App principal con bottom nav */}
-        {isSplashDone && isAuthenticated && (
-          <>
-            <View style={{ flex: 1 }}>{renderMainContent()}</View>
-
-            <BottomMenu
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              colors={COLORS}
-            />
-          </>
-        )}
+                {/* 3) App principal con bottom nav */}
+                <Stack.Screen
+                  name="Dashboard"
+                  component={DashboardWrapper}
+                />
+              </>
+            )}
+          </Stack.Navigator>
+        </NavigationContainer>
       </SafeAreaView>
     </LanguageProvider>
   );

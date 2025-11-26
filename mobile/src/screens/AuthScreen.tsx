@@ -7,22 +7,31 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { COLORS } from '../theme/colors';
 
-type Props = {
-  onAuthSuccess: () => void;
-  onGoToRegister: () => void;   // 🔹 nuevo prop para ir al registro
+type RootStackParamList = {
+  Splash: undefined;
+  Auth: undefined;
+  Register: undefined;
+  LoginEmail: undefined;
+  Dashboard: undefined;
 };
 
-const AuthScreen: React.FC<Props> = ({ onAuthSuccess, onGoToRegister }) => {
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>;
+
+const AuthScreen: React.FC = () => {
+  const navigation = useNavigation<NavigationProp>();
+
   const handleCreateAccount = () => {
-    // Ahora navegamos a la pantalla de registro
-    onGoToRegister();
+    // Ir a pantalla de registro
+    navigation.navigate('Register');
   };
 
   const handleLogin = () => {
-    // Aquí después irán las pantallas reales de login
-    onAuthSuccess();
+    // Ir a pantalla de login por correo (tipo NU)
+    navigation.navigate('LoginEmail');
   };
 
   // Año actual para los créditos
