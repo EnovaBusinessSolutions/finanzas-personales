@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { COLORS } from '../theme/colors';
 
 type RootStackParamList = {
   Splash: undefined;
@@ -30,17 +31,13 @@ const LoginEmailScreen: React.FC<Props> = ({ navigation }) => {
 
   const isValidEmail = (value: string) => {
     if (!value.trim()) return false;
-    // Validación sencilla
     const regex = /\S+@\S+\.\S+/;
     return regex.test(value.trim());
   };
 
   const handleNext = () => {
     if (!isValidEmail(email)) return;
-
-    // Aquí después podrás hacer la lógica real de login (API, etc.)
-    // De momento lo mandamos al Dashboard simulando login exitoso.
-    navigation.replace('Dashboard'); // 👈 sin segundo parámetro
+    navigation.replace('Dashboard');
   };
 
   const canContinue = isValidEmail(email);
@@ -56,19 +53,32 @@ const LoginEmailScreen: React.FC<Props> = ({ navigation }) => {
             {/* Header superior (flecha atrás + icono ojo/help) */}
             <View style={styles.headerRow}>
               <TouchableOpacity onPress={() => navigation.goBack()}>
-                <Ionicons name="chevron-back" size={24} />
+                <Ionicons
+                  name="chevron-back"
+                  size={24}
+                  color={COLORS.text}
+                />
               </TouchableOpacity>
 
-              {/* Icono tipo NU (ojo/secreto) */}
-              <TouchableOpacity onPress={() => { /* luego puedes abrir ayuda */ }}>
-                <Ionicons name="eye-outline" size={22} />
+              <TouchableOpacity onPress={() => { /* ayuda / info de seguridad */ }}>
+                <Ionicons
+                  name="eye-outline"
+                  size={22}
+                  color={COLORS.muted}
+                />
               </TouchableOpacity>
             </View>
 
-            {/* Título grande */}
-            <Text style={styles.title}>
-              Escribe tu correo{'\n'}electrónico
-            </Text>
+            {/* Título grande + subtítulo */}
+            <View style={styles.titleBlock}>
+              <Text style={styles.title}>
+                Escribe tu correo{'\n'}electrónico
+              </Text>
+              <Text style={styles.subtitle}>
+                Usaremos este correo para enviarte información importante
+                sobre tu cuenta.
+              </Text>
+            </View>
 
             {/* Campo de correo */}
             <View style={styles.inputWrapper}>
@@ -77,22 +87,29 @@ const LoginEmailScreen: React.FC<Props> = ({ navigation }) => {
                 value={email}
                 onChangeText={setEmail}
                 placeholder="correo@ejemplo.com"
-                placeholderTextColor="#b3b3b3"
+                placeholderTextColor={COLORS.muted}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
-                selectionColor="#8A2BE2" // moradito tipo NU
+                selectionColor={COLORS.primary}
               />
             </View>
 
             {/* Botón flotante de flecha (abajo derecha) */}
             <TouchableOpacity
-              style={[styles.fab, !canContinue && styles.fabDisabled]}
+              style={[
+                styles.fab,
+                !canContinue && styles.fabDisabled,
+              ]}
               onPress={handleNext}
               activeOpacity={0.8}
               disabled={!canContinue}
             >
-              <Ionicons name="arrow-forward" size={24} color="#ffffff" />
+              <Ionicons
+                name="arrow-forward"
+                size={26}
+                color={canContinue ? '#FFFFFF' : '#9CA3AF'}
+              />
             </TouchableOpacity>
           </View>
         </TouchableWithoutFeedback>
@@ -104,11 +121,11 @@ const LoginEmailScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.background, // mismo fondo que Auth
   },
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.background,
   },
   headerRow: {
     flexDirection: 'row',
@@ -117,43 +134,51 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 8,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#111111',
-    marginTop: 24,
+  titleBlock: {
+    marginTop: 32,
     paddingHorizontal: 20,
-    lineHeight: 34,
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: '800',
+    color: COLORS.text,
+    lineHeight: 36,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: COLORS.muted,
   },
   inputWrapper: {
-    marginTop: 40,
+    marginTop: 32,
     paddingHorizontal: 20,
   },
   input: {
     fontSize: 18,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    color: '#111111',
+    paddingVertical: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: '#E5E7EB',
+    color: COLORS.text,
   },
   fab: {
     position: 'absolute',
     right: 24,
     bottom: 40,
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#111827', // azul/marino oscuro tipo HappyLife
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 5,
   },
   fabDisabled: {
-    opacity: 0.25,
+    backgroundColor: '#E5E7EB',
   },
 });
 
