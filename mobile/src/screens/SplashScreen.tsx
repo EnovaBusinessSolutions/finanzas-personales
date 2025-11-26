@@ -12,7 +12,7 @@ const { width, height } = Dimensions.get('window');
 const ICON_SIZE = width * 0.30; // icono ~30% del ancho
 
 // 🔹 Logo E-nova grande, estilo “Meta”
-const ENOVA_WIDTH = width * 1.50;         // antes 0.42 → más ancho
+const ENOVA_WIDTH = width * 0.80;         // antes 0.42 → más ancho
 const ENOVA_HEIGHT = ENOVA_WIDTH * 0.24;  // proporción horizontal
 
 // Cargamos las imágenes una sola vez
