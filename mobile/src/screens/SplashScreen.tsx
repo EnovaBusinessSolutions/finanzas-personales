@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   fromLabel: {
     fontSize: 18,          // texto “from” grande
     color: COLORS.muted,
-    marginBottom: 2,       // 🔹 más pegado al logo
+    marginBottom: -4,      // ⬅️ casi pegado al logo E-nova
     fontWeight: '500',
   },
   enovaLogo: {
@@ -78,5 +78,6 @@ const styles = StyleSheet.create({
     height: ENOVA_HEIGHT,
   },
 });
+
 
 export default SplashScreen;
