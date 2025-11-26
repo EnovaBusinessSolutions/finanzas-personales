@@ -65,12 +65,12 @@ const styles = StyleSheet.create({
   },
   footer: {
     alignItems: 'center',
-    marginBottom: height * 5, // posición parecida a WhatsApp
+    marginBottom: height * 0.09, // posición parecida a WhatsApp
   },
   fromLabel: {
     fontSize: 18,          // texto “from” grande
     color: COLORS.muted,
-    marginBottom: 5,       // 🔹 más pegado al logo
+    marginBottom: 2,       // 🔹 más pegado al logo
     fontWeight: '500',
   },
   enovaLogo: {
