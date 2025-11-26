@@ -6,69 +6,32 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
 import { COLORS } from '../theme/colors';
-import { useLanguage } from '../context/LanguageContext';
 
-type AuthScreenProps = {
+type Props = {
   onAuthSuccess: () => void;
 };
 
-const copy = {
-  es: {
-    title: 'Bienvenido a tu app financiera',
-    subtitle: 'Administra tus cuentas, alertas y metas desde un solo lugar.',
-    loginTab: 'Iniciar sesión',
-    registerTab: 'Crear cuenta',
-    name: 'Nombre',
-    email: 'Correo electrónico',
-    password: 'Contraseña',
-    confirmPassword: 'Confirmar contraseña',
-    loginButton: 'Entrar',
-    registerButton: 'Crear cuenta',
-    noAccount: '¿Aún no tienes cuenta? Regístrate',
-    haveAccount: '¿Ya tienes cuenta? Inicia sesión',
-  },
-  en: {
-    title: 'Welcome to your finance app',
-    subtitle: 'Manage accounts, alerts and goals from one place.',
-    loginTab: 'Log in',
-    registerTab: 'Sign up',
-    name: 'Name',
-    email: 'Email',
-    password: 'Password',
-    confirmPassword: 'Confirm password',
-    loginButton: 'Log in',
-    registerButton: 'Create account',
-    noAccount: "Don't have an account yet? Sign up",
-    haveAccount: 'Already have an account? Log in',
-  },
-};
+type Mode = 'login' | 'register';
 
-const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
-  const { language } = useLanguage();
-  const t = copy[language];
+const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
+  const [mode, setMode] = useState<Mode>('login');
 
-  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handlePrimaryAction = () => {
-    // 👇 Aquí después conectaremos con tu backend / Belvo / etc.
+  const isLogin = mode === 'login';
+
+  const handleSubmit = () => {
+    // TODO: aquí después conectaremos con tu backend real.
+    // Por ahora solo simulamos que todo salió bien.
     onAuthSuccess();
-  };
-
-  const switchToLogin = () => {
-    setMode('login');
-  };
-
-  const switchToRegister = () => {
-    setMode('register');
   };
 
   return (
@@ -77,119 +40,147 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <Text style={styles.appName}>E-nova Finance</Text>
-          <Text style={styles.title}>{t.title}</Text>
-          <Text style={styles.subtitle}>{t.subtitle}</Text>
+        {/* HERO tipo NU pero con tu branding */}
+        <View style={styles.hero}>
+          <Text style={styles.heroTag}>E-NOVA FINANCE</Text>
+          <Text style={styles.heroTitle}>
+            Las finanzas claras deberían ser lo normal.
+          </Text>
+          <Text style={styles.heroSubtitle}>
+            Administra tus cuentas, alertas y metas desde un solo lugar.
+          </Text>
         </View>
 
-        {/* Tabs login / registro */}
-        <View style={styles.segmentRow}>
-          <TouchableOpacity
-            style={[
-              styles.segmentButton,
-              mode === 'login' && styles.segmentButtonActive,
-            ]}
-            onPress={switchToLogin}
-          >
-            <Text
-              style={[
-                styles.segmentText,
-                mode === 'login' && styles.segmentTextActive,
-              ]}
-            >
-              {t.loginTab}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.segmentButton,
-              mode === 'register' && styles.segmentButtonActive,
-            ]}
-            onPress={switchToRegister}
-          >
-            <Text
-              style={[
-                styles.segmentText,
-                mode === 'register' && styles.segmentTextActive,
-              ]}
-            >
-              {t.registerTab}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
+        {/* Card principal de auth */}
         <View style={styles.card}>
-          {mode === 'register' && (
-            <>
-              <Text style={styles.inputLabel}>{t.name}</Text>
+          {/* Segment control modo NU: Crear cuenta / Iniciar sesión */}
+          <View style={styles.segmentContainer}>
+            <TouchableOpacity
+              style={[
+                styles.segmentButton,
+                !isLogin && styles.segmentButtonActive,
+              ]}
+              onPress={() => setMode('register')}
+            >
+              <Text
+                style={[
+                  styles.segmentText,
+                  !isLogin && styles.segmentTextActive,
+                ]}
+              >
+                Crear cuenta
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.segmentButton,
+                isLogin && styles.segmentButtonActive,
+              ]}
+              onPress={() => setMode('login')}
+            >
+              <Text
+                style={[
+                  styles.segmentText,
+                  isLogin && styles.segmentTextActive,
+                ]}
+              >
+                Iniciar sesión
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Título del formulario */}
+          <Text style={styles.formTitle}>
+            {isLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta financiera'}
+          </Text>
+          <Text style={styles.formSubtitle}>
+            {isLogin
+              ? 'Ingresa con tu correo y contraseña.'
+              : 'Toma menos de un minuto empezar.'}
+          </Text>
+
+          {/* Campos */}
+          {!isLogin && (
+            <View style={{ marginBottom: 12 }}>
+              <Text style={styles.label}>Nombre completo</Text>
               <TextInput
+                placeholder="Tu nombre"
+                placeholderTextColor="#9ca3af"
                 style={styles.input}
-                placeholder={t.name}
-                placeholderTextColor={COLORS.muted}
                 value={name}
                 onChangeText={setName}
               />
-            </>
+            </View>
           )}
 
-          <Text style={styles.inputLabel}>{t.email}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder={t.email}
-            placeholderTextColor={COLORS.muted}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-          />
+          <View style={{ marginBottom: 12 }}>
+            <Text style={styles.label}>Correo electrónico</Text>
+            <TextInput
+              placeholder="correo@ejemplo.com"
+              placeholderTextColor="#9ca3af"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+            />
+          </View>
 
-          <Text style={styles.inputLabel}>{t.password}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder={t.password}
-            placeholderTextColor={COLORS.muted}
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
+          <View style={{ marginBottom: 12 }}>
+            <Text style={styles.label}>Contraseña</Text>
+            <TextInput
+              placeholder="••••••••"
+              placeholderTextColor="#9ca3af"
+              secureTextEntry
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+            />
+          </View>
 
-          {mode === 'register' && (
-            <>
-              <Text style={styles.inputLabel}>{t.confirmPassword}</Text>
+          {!isLogin && (
+            <View style={{ marginBottom: 16 }}>
+              <Text style={styles.label}>Confirmar contraseña</Text>
               <TextInput
-                style={styles.input}
-                placeholder={t.confirmPassword}
-                placeholderTextColor={COLORS.muted}
+                placeholder="Repite tu contraseña"
+                placeholderTextColor="#9ca3af"
                 secureTextEntry
+                style={styles.input}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
               />
-            </>
+            </View>
           )}
 
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={handlePrimaryAction}
-          >
+          {/* Botón principal tipo NU */}
+          <TouchableOpacity style={styles.primaryButton} onPress={handleSubmit}>
             <Text style={styles.primaryButtonText}>
-              {mode === 'login' ? t.loginButton : t.registerButton}
+              {isLogin ? 'Entrar' : 'Continuar'}
             </Text>
           </TouchableOpacity>
 
-          {mode === 'login' ? (
-            <TouchableOpacity style={styles.switchMode} onPress={switchToRegister}>
-              <Text style={styles.switchModeText}>{t.noAccount}</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity style={styles.switchMode} onPress={switchToLogin}>
-              <Text style={styles.switchModeText}>{t.haveAccount}</Text>
-            </TouchableOpacity>
+          {/* Link secundario para cambiar de modo */}
+          <TouchableOpacity
+            style={styles.secondaryLink}
+            onPress={() => setMode(isLogin ? 'register' : 'login')}
+          >
+            <Text style={styles.secondaryLinkText}>
+              {isLogin
+                ? '¿Aún no tienes cuenta? Crear cuenta'
+                : '¿Ya tienes cuenta? Inicia sesión'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Aviso legal */}
+          {!isLogin && (
+            <Text style={styles.legalText}>
+              Al continuar aceptas nuestros Términos y el Aviso de privacidad.
+            </Text>
           )}
         </View>
       </ScrollView>
@@ -199,41 +190,50 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
 
 const styles = StyleSheet.create({
   content: {
-    flexGrow: 1,
     paddingHorizontal: 24,
     paddingTop: 40,
     paddingBottom: 32,
-    justifyContent: 'center',
   },
-  header: {
-    marginBottom: 24,
-    alignItems: 'center',
+  hero: {
+    marginBottom: 28,
   },
-  appName: {
-    fontSize: 18,
-    letterSpacing: 3,
+  heroTag: {
+    fontSize: 13,
+    letterSpacing: 4,
     textTransform: 'uppercase',
     color: COLORS.muted,
     marginBottom: 8,
   },
-  title: {
-    fontSize: 22,
+  heroTitle: {
+    fontSize: 28,
     fontWeight: '800',
     color: COLORS.text,
-    textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 8,
   },
-  subtitle: {
-    fontSize: 13,
+  heroSubtitle: {
+    fontSize: 14,
     color: COLORS.muted,
-    textAlign: 'center',
+    lineHeight: 20,
   },
-  segmentRow: {
+
+  card: {
+    backgroundColor: COLORS.card,
+    borderRadius: 28,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+  },
+
+  segmentContainer: {
     flexDirection: 'row',
-    marginBottom: 16,
-    backgroundColor: '#e5edf0',
+    backgroundColor: '#e5edf5',
     borderRadius: 999,
     padding: 4,
+    marginBottom: 18,
   },
   segmentButton: {
     flex: 1,
@@ -244,60 +244,79 @@ const styles = StyleSheet.create({
   },
   segmentButtonActive: {
     backgroundColor: COLORS.card,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
   },
   segmentText: {
     fontSize: 13,
-    color: COLORS.muted,
     fontWeight: '500',
+    color: COLORS.muted,
   },
   segmentTextActive: {
     color: COLORS.text,
     fontWeight: '700',
   },
-  card: {
-    backgroundColor: COLORS.card,
-    borderRadius: 24,
-    paddingHorizontal: 18,
-    paddingVertical: 18,
+
+  formTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 4,
   },
-  inputLabel: {
+  formSubtitle: {
+    fontSize: 13,
+    color: COLORS.muted,
+    marginBottom: 16,
+  },
+
+  label: {
     fontSize: 13,
     fontWeight: '600',
     color: COLORS.text,
-    marginTop: 6,
     marginBottom: 4,
   },
   input: {
-    borderRadius: 12,
+    height: 46,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    backgroundColor: '#f4f6fb',
     borderWidth: 1,
     borderColor: '#e5e7eb',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
     fontSize: 14,
-    marginBottom: 6,
     color: COLORS.text,
-    backgroundColor: '#f9fafb',
   },
+
   primaryButton: {
-    marginTop: 12,
+    marginTop: 4,
     backgroundColor: COLORS.primary,
     borderRadius: 999,
-    paddingVertical: 12,
+    paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryButtonText: {
-    color: COLORS.card,
-    fontWeight: '700',
+    color: '#ffffff',
     fontSize: 15,
+    fontWeight: '700',
   },
-  switchMode: {
-    marginTop: 12,
+
+  secondaryLink: {
+    marginTop: 14,
     alignItems: 'center',
   },
-  switchModeText: {
-    fontSize: 12,
+  secondaryLinkText: {
+    fontSize: 13,
     color: COLORS.muted,
+  },
+
+  legalText: {
+    marginTop: 10,
+    fontSize: 11,
+    color: COLORS.muted,
+    textAlign: 'center',
+    lineHeight: 16,
   },
 });
 
