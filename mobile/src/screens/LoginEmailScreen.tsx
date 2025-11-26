@@ -50,21 +50,13 @@ const LoginEmailScreen: React.FC<Props> = ({ navigation }) => {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.container}>
-            {/* Header superior (flecha atrás + icono ojo/help) */}
+            {/* Header superior (solo flecha atrás) */}
             <View style={styles.headerRow}>
               <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Ionicons
                   name="chevron-back"
                   size={24}
                   color={COLORS.text}
-                />
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => { /* ayuda / info de seguridad */ }}>
-                <Ionicons
-                  name="eye-outline"
-                  size={22}
-                  color={COLORS.muted}
                 />
               </TouchableOpacity>
             </View>
@@ -119,17 +111,17 @@ const LoginEmailScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  // 👉 Fondo blanco como antes
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background, // mismo fondo que Auth
+    backgroundColor: '#FFFFFF',
   },
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#FFFFFF',
   },
   headerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 8,
