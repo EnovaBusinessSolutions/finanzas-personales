@@ -1,4 +1,4 @@
-// mobile/src/screens/Settings.tsx
+// mobile/src/screens/Settings.tsx 
 import React, { useState } from 'react';
 import {
   View,
@@ -58,7 +58,7 @@ const STRINGS = {
     nameValue: 'Jose Manuel',
     emailValue: 'correo@ejemplo.com',
 
-    // 👇 NUEVO: textos de cuenta/cerrar sesión
+    // Cuenta / logout
     accountTitle: 'Cuenta',
     logoutButton: 'Cerrar sesión',
     logoutSubtitle: 'Salir de la app en este dispositivo.',
@@ -103,14 +103,13 @@ const STRINGS = {
     nameValue: 'Jose Manuel',
     emailValue: 'email@example.com',
 
-    // 👇 NUEVO
     accountTitle: 'Account',
     logoutButton: 'Sign out',
     logoutSubtitle: 'Sign out from this device.',
   },
 };
 
-// 👇 mismas rutas que en App.tsx
+// mismas rutas que en App.tsx
 type RootStackParamList = {
   Splash: undefined;
   Auth: undefined;
@@ -174,10 +173,8 @@ export default function SettingsScreen() {
 
   const handleLogout = async () => {
     try {
-      // 💾 borrar credenciales guardadas
       await AsyncStorage.multiRemove(['authToken', 'authUser']);
 
-      // 🔁 resetear navegación para volver al flujo de Auth
       navigation.reset({
         index: 0,
         routes: [{ name: 'Auth' }],
@@ -186,7 +183,7 @@ export default function SettingsScreen() {
       console.log('Error al cerrar sesión:', err);
       Alert.alert(
         'Error',
-        'No pudimos cerrar sesión. Intenta de nuevo.'
+        'No pudimos cerrar sesión. Intenta de nuevo.',
       );
     }
   };
@@ -490,21 +487,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // 🔴 Estilos del botón de cerrar sesión
+  // 🔵 Estilos nuevos del botón de cerrar sesión (look NU / Adnova)
   logoutButton: {
-    backgroundColor: '#FEE2E2', // rojo muy claro
-    borderRadius: 16,
+    marginTop: 6,
+    borderRadius: 999,
     paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingHorizontal: 18,
+    backgroundColor: COLORS.primary, // mismo azul oscuro que los botones activos
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logoutText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#B91C1C',
+    color: '#FFFFFF',
   },
   logoutSubtext: {
-    marginTop: 4,
+    marginTop: 2,
     fontSize: 12,
-    color: '#7F1D1D',
+    color: '#E5E7EB', // gris clarito para contraste suave
   },
 });
