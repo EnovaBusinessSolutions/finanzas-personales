@@ -1,3 +1,4 @@
+// backend/src/routes/auth.js
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -8,30 +9,46 @@ const router = express.Router();
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, phone } = req.body;
+    const { name, email, password, phone } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email y contraseña son obligatorios' });
+    // Validaciones básicas
+    if (!name || !email || !password || !phone) {
+      return res
+        .status(400)
+        .json({ message: 'Nombre, email, teléfono y contraseña son obligatorios' });
+    }
+
+    if (password.length < 8) {
+      return res
+        .status(400)
+        .json({ message: 'La contraseña debe tener al menos 8 caracteres' });
     }
 
     const existing = await User.findOne({ email });
     if (existing) {
-      return res.status(409).json({ message: 'Este correo ya está registrado' });
+      return res
+        .status(409)
+        .json({ message: 'Este correo ya está registrado, intenta con otro.' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
 
     const user = await User.create({
+      name,
       email,
       passwordHash,
       phone,
     });
 
-    // En este MVP no confirmamos correo todavía
+    // En este MVP todavía no confirmamos correo/teléfono
     res.status(201).json({
       id: user._id,
+      name: user.name,
       email: user.email,
+      phone: user.phone,
       createdAt: user.createdAt,
+      isEmailVerified: user.isEmailVerified,
+      isPhoneVerified: user.isPhoneVerified,
     });
   } catch (err) {
     console.error('Error en /register', err);
@@ -45,17 +62,23 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email y contraseña son obligatorios' });
+      return res
+        .status(400)
+        .json({ message: 'Email y contraseña son obligatorios' });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
+      return res
+        .status(401)
+        .json({ message: 'Tu correo o contraseña no coinciden. Vuelve a intentarlo' });
     }
 
     const isValid = await bcrypt.compare(password, user.passwordHash);
     if (!isValid) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
+      return res
+        .status(401)
+        .json({ message: 'Tu correo o contraseña no coinciden. Vuelve a intentarlo' });
     }
 
     const token = jwt.sign(
@@ -68,7 +91,9 @@ router.post('/login', async (req, res) => {
       token,
       user: {
         id: user._id,
+        name: user.name,
         email: user.email,
+        phone: user.phone,
         isEmailVerified: user.isEmailVerified,
         isPhoneVerified: user.isPhoneVerified,
       },

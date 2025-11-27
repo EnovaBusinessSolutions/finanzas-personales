@@ -1,7 +1,15 @@
+// backend/models/User.js
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
   {
+    // 👇 NUEVO: nombre del usuario
+    name: {
+      type: String,
+      required: true,   // lo hacemos obligatorio para el registro
+      trim: true,
+    },
+
     email: {
       type: String,
       required: true,
@@ -15,6 +23,7 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
+      // si luego quieres, puedes poner required: true
     },
     isEmailVerified: {
       type: Boolean,

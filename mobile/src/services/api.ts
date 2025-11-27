@@ -70,6 +70,7 @@ export type DashboardDemoResponse = {
 
 export type AuthUser = {
   id: string;
+  name?: string;          // 👈 nuevo
   email: string;
   phone?: string;
   createdAt?: string;
@@ -111,6 +112,7 @@ export async function getDashboardDemo() {
 
 // POST /api/auth/register
 export async function registerUser(input: {
+  name: string;       // 👈 pedimos nombre al registrar
   email: string;
   password: string;
   phone: string;
@@ -141,4 +143,26 @@ export async function saveAuthSession(
 ): Promise<void> {
   await AsyncStorage.setItem('authToken', token);
   await AsyncStorage.setItem('authUser', JSON.stringify(user));
+}
+
+// 🔎 Leer sesión guardada (nos servirá para Settings, etc.)
+export async function getSavedAuthSession(): Promise<{
+  token: string | null;
+  user: AuthUser | null;
+}> {
+  const [token, userStr] = await Promise.all([
+    AsyncStorage.getItem('authToken'),
+    AsyncStorage.getItem('authUser'),
+  ]);
+
+  let user: AuthUser | null = null;
+  if (userStr) {
+    try {
+      user = JSON.parse(userStr);
+    } catch {
+      user = null;
+    }
+  }
+
+  return { token, user };
 }

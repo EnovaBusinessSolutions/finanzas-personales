@@ -154,16 +154,22 @@ export default function SettingsScreen() {
           setAuthUser(parsed);
         }
       } catch (err) {
-        console.log('No se pudo cargar authUser desde AsyncStorage:', err);
+        console.log(
+          'No se pudo cargar authUser desde AsyncStorage:',
+          err
+        );
       }
     };
 
     loadUser();
   }, []);
 
-  // Nombre bonito a partir del email si no tenemos name real
+  // 👇 Nombre bonito: name real > parte antes de @ > fallback del idioma
   const displayName =
-    authUser?.email?.split('@')[0] || t.nameValue;
+    (authUser?.name && authUser.name.trim().length > 0
+      ? authUser.name.trim()
+      : authUser?.email?.split('@')[0]) || t.nameValue;
+
   const displayEmail = authUser?.email || t.emailValue;
 
   const handleSelectLanguage = (lang: Language) => {
@@ -188,7 +194,7 @@ export default function SettingsScreen() {
             },
           },
         ],
-        { cancelable: true },
+        { cancelable: true }
       );
       return;
     }
@@ -209,7 +215,7 @@ export default function SettingsScreen() {
       console.log('Error al cerrar sesión:', err);
       Alert.alert(
         'Error',
-        'No pudimos cerrar sesión. Intenta de nuevo.',
+        'No pudimos cerrar sesión. Intenta de nuevo.'
       );
     }
   };
@@ -513,7 +519,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Botón cerrar sesión (ya azul pill)
+  // Botón cerrar sesión (píldora azul)
   logoutButton: {
     marginTop: 6,
     borderRadius: 999,

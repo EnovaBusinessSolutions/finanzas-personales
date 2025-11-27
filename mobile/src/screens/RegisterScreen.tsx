@@ -30,6 +30,7 @@ const RegisterScreen: React.FC<Props> = ({
   onRegisterSuccess,
   onBackToLogin,
 }) => {
+  const [name, setName] = useState('');              // 👈 nuevo
   const [email, setEmail] = useState('');
   const [confirmEmail, setConfirmEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -40,6 +41,9 @@ const RegisterScreen: React.FC<Props> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // ---------- Validaciones ----------
+  const isValidName = (value: string) =>
+    value.trim().length >= 2; // algo sencillo por ahora
+
   const isValidEmail = (value: string) => {
     if (!value.trim()) return false;
     const regex = /\S+@\S+\.\S+/;
@@ -59,6 +63,7 @@ const RegisterScreen: React.FC<Props> = ({
     confirmEmail.trim().toLowerCase();
 
   const canContinue =
+    isValidName(name) &&
     isValidEmail(email) &&
     emailsMatch &&
     isValidPhone(phone) &&
@@ -72,17 +77,19 @@ const RegisterScreen: React.FC<Props> = ({
       setLoading(true);
       setErrorMsg(null);
 
+      const trimmedName = name.trim();
       const trimmedEmail = email.trim().toLowerCase();
       const trimmedPassword = password.trim();
 
-      // 1) Registrar usuario en backend
+      // 1) Registrar usuario en backend (con nombre)
       await registerUser({
+        name: trimmedName,
         email: trimmedEmail,
         password: trimmedPassword,
         phone: phone.trim(),
       });
 
-      // 2) Login inmediato para obtener token + user
+      // 2) Login inmediato para obtener token + user (que ya trae name)
       const { token, user } = await loginUser({
         email: trimmedEmail,
         password: trimmedPassword,
@@ -96,12 +103,10 @@ const RegisterScreen: React.FC<Props> = ({
     } catch (err: any) {
       console.log('Error en registro:', err);
 
-      // Mensaje amigable por defecto
       let msg =
         'No pudimos crear tu cuenta. Intenta de nuevo.';
 
-      // Si el backend manda message legible, úsalo
-      if (err?.message?.includes('ya registrado')) {
+      if (err?.message?.includes('ya está registrado')) {
         msg = 'Este correo ya está registrado.';
       }
 
@@ -145,6 +150,20 @@ const RegisterScreen: React.FC<Props> = ({
                 <Text style={styles.subtitle}>
                   Aquí también puedes iniciar tu solicitud.
                 </Text>
+
+                {/* Nombre */}
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.label}>¿Cómo te llamas?</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Tu nombre"
+                    placeholderTextColor="#b0bcc9"
+                    value={name}
+                    onChangeText={setName}
+                    selectionColor={COLORS.primary}
+                    editable={!loading}
+                  />
+                </View>
 
                 {/* Correo */}
                 <View style={styles.fieldGroup}>
@@ -232,6 +251,7 @@ const RegisterScreen: React.FC<Props> = ({
                     />
                     <TouchableOpacity
                       onPress={() => setSecure(prev => !prev)}
+                      style={styles.eyeButton}
                       hitSlop={{
                         top: 10,
                         bottom: 10,
@@ -240,9 +260,15 @@ const RegisterScreen: React.FC<Props> = ({
                       }}
                       disabled={loading}
                     >
-                      <Text style={styles.toggleSecure}>
-                        {secure ? 'Mostrar' : 'Ocultar'}
-                      </Text>
+                      <Ionicons
+                        name={
+                          secure
+                            ? 'eye-off-outline'
+                            : 'eye-outline'
+                        }
+                        size={20}
+                        color={COLORS.muted}
+                      />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -395,11 +421,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.text,
   },
-  toggleSecure: {
+  eyeButton: {
     marginLeft: 10,
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.primary,
   },
 
   errorWrapper: {
