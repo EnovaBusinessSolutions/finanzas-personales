@@ -172,20 +172,22 @@ const RegisterScreen: React.FC<Props> = ({
                 </Text>
 
                 {/* Nombre */}
-                <View style={styles.fieldGroup}>
-                  <Text style={styles.label}>¿Cómo te llamas?</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Tu nombre"
-                    placeholderTextColor="#b0bcc9"
-                    value={name}
-                    onChangeText={text =>
-                      setName(normalizeName(text))
-                    } // 👈 se normaliza mientras escribe
-                    selectionColor={COLORS.primary}
-                    editable={!loading}
-                  />
-                </View>
+<View style={styles.fieldGroup}>
+  <Text style={styles.label}>¿Cómo te llamas?</Text>
+  <TextInput
+    style={styles.input}
+    placeholder="Tu nombre"
+    placeholderTextColor="#b0bcc9"
+    value={name}
+    onChangeText={setName}
+    selectionColor={COLORS.primary}
+    editable={!loading}
+    keyboardType="default"       // 👈 teclado normal con espacio
+    autoCapitalize="words"       // 👈 pone mayúscula al iniciar cada palabra
+    autoCorrect={true}           // 👈 deja que iOS ayude con acentos, etc.
+    returnKeyType="next"
+  />
+</View>
 
                 {/* Correo */}
                 <View style={styles.fieldGroup}>
