@@ -9,6 +9,10 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
 import { COLORS } from '../theme/colors';
 import { useLanguage, Language } from '../context/LanguageContext';
 
@@ -53,6 +57,11 @@ const STRINGS = {
 
     nameValue: 'Jose Manuel',
     emailValue: 'correo@ejemplo.com',
+
+    // 👇 NUEVO: textos de cuenta/cerrar sesión
+    accountTitle: 'Cuenta',
+    logoutButton: 'Cerrar sesión',
+    logoutSubtitle: 'Salir de la app en este dispositivo.',
   },
   en: {
     settingsTitle: 'Settings',
@@ -93,8 +102,28 @@ const STRINGS = {
 
     nameValue: 'Jose Manuel',
     emailValue: 'email@example.com',
+
+    // 👇 NUEVO
+    accountTitle: 'Account',
+    logoutButton: 'Sign out',
+    logoutSubtitle: 'Sign out from this device.',
   },
 };
+
+// 👇 mismas rutas que en App.tsx
+type RootStackParamList = {
+  Splash: undefined;
+  Auth: undefined;
+  LoginEmail: undefined;
+  LoginPassword: { email: string };
+  Register: undefined;
+  Dashboard: undefined;
+};
+
+type NavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Dashboard'
+>;
 
 export default function SettingsScreen() {
   const {
@@ -103,6 +132,8 @@ export default function SettingsScreen() {
     hasSeenLanguageInfo,
     setHasSeenLanguageInfo,
   } = useLanguage();
+
+  const navigation = useNavigation<NavigationProp>();
 
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(false);
@@ -139,6 +170,25 @@ export default function SettingsScreen() {
 
     // Si ya vio el mensaje, solo cambiamos idioma
     setLanguage(lang);
+  };
+
+  const handleLogout = async () => {
+    try {
+      // 💾 borrar credenciales guardadas
+      await AsyncStorage.multiRemove(['authToken', 'authUser']);
+
+      // 🔁 resetear navegación para volver al flujo de Auth
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Auth' }],
+      });
+    } catch (err) {
+      console.log('Error al cerrar sesión:', err);
+      Alert.alert(
+        'Error',
+        'No pudimos cerrar sesión. Intenta de nuevo.'
+      );
+    }
   };
 
   return (
@@ -318,6 +368,22 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        {/* Cuenta / Cerrar sesión */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{t.accountTitle}</Text>
+
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.logoutText}>{t.logoutButton}</Text>
+            <Text style={styles.logoutSubtext}>
+              {t.logoutSubtitle}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={{ height: 120 }} />
       </ScrollView>
     </View>
@@ -422,5 +488,23 @@ const styles = StyleSheet.create({
   segmentTextActive: {
     color: '#ffffff',
     fontWeight: '600',
+  },
+
+  // 🔴 Estilos del botón de cerrar sesión
+  logoutButton: {
+    backgroundColor: '#FEE2E2', // rojo muy claro
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  logoutText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#B91C1C',
+  },
+  logoutSubtext: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#7F1D1D',
   },
 });
