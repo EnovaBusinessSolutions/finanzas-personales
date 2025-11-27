@@ -15,10 +15,12 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { COLORS } from '../theme/colors';
 import { loginUser } from '../services/api';
 
-// 👇 mismo tipo que en LoginEmailScreen
+// 👇 mismo tipo local que usamos también en LoginEmailScreen
 type RootStackParamList = {
   Splash: undefined;
   Auth: undefined;
@@ -47,21 +49,41 @@ const LoginPasswordScreen: React.FC<Props> = ({ navigation, route }) => {
       setLoading(true);
       setErrorMsg(null);
 
-      // Llamamos a la API real de login
-      await loginUser({email,password: password.trim(),});
+      // 🔐 Llamamos a la API real de login
+      const { token, user } = await loginUser({
+        email: email.trim(),
+        password: password.trim(),
+      });
 
-      // Más adelante aquí puedes guardar token en AsyncStorage, etc.
+      // 💾 Guardamos credenciales básicas en AsyncStorage
+      await AsyncStorage.setItem('authToken', token);
+      await AsyncStorage.setItem('authUser', JSON.stringify(user));
 
-      // Reset de navegación para entrar a la app y que no pueda volver al login con “back”
+      // Opcional: limpiar password en memoria
+      setPassword('');
+
+      // 🔁 Reset de navegación para entrar a la app
+      // y que no pueda volver al login con “back”
       navigation.reset({
         index: 0,
         routes: [{ name: 'Dashboard' }],
       });
     } catch (err: any) {
       console.log('Error en login:', err);
-      setErrorMsg(
-        'Correo o contraseña incorrectos. Intenta de nuevo.'
-      );
+
+      // Mensaje amigable según el tipo de error
+      const generic =
+        'Correo o contraseña incorrectos. Intenta de nuevo.';
+      const msgFromError =
+        typeof err?.message === 'string' ? err.message : generic;
+
+      // Si es 401/403 o algo así, dejamos el mensaje genérico,
+      // si no, mostramos el de red/servidor:
+      if (/401|403/i.test(msgFromError)) {
+        setErrorMsg(generic);
+      } else {
+        setErrorMsg(msgFromError || generic);
+      }
     } finally {
       setLoading(false);
     }
@@ -156,10 +178,7 @@ const LoginPasswordScreen: React.FC<Props> = ({ navigation, route }) => {
 
             {/* Botón flotante de flecha */}
             <TouchableOpacity
-              style={[
-                styles.fab,
-                !canContinue && styles.fabDisabled,
-              ]}
+              style={[styles.fab, !canContinue && styles.fabDisabled]}
               onPress={handleNext}
               activeOpacity={0.8}
               disabled={!canContinue}

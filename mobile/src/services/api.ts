@@ -71,7 +71,14 @@ export type AuthUser = {
   id: string;
   email: string;
   phone?: string;
-  createdAt: string;
+  createdAt?: string;
+  isEmailVerified?: boolean;
+  isPhoneVerified?: boolean;
+};
+
+export type LoginResponse = {
+  token: string;
+  user: AuthUser;
 };
 
 // =====================
@@ -118,8 +125,8 @@ export async function registerUser(input: {
 export async function loginUser(input: {
   email: string;
   password: string;
-}): Promise<AuthUser> {
-  const body = await request<AuthUser>('/api/auth/login', {
+}): Promise<LoginResponse> {
+  const body = await request<LoginResponse>('/api/auth/login', {
     method: 'POST',
     body: JSON.stringify(input),
   });
