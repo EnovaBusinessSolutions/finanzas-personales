@@ -12,6 +12,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { COLORS } from '../theme/colors';
@@ -30,7 +31,7 @@ const RegisterScreen: React.FC<Props> = ({
   onRegisterSuccess,
   onBackToLogin,
 }) => {
-  const [name, setName] = useState('');              // 👈 nuevo
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [confirmEmail, setConfirmEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -41,8 +42,7 @@ const RegisterScreen: React.FC<Props> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // ---------- Validaciones ----------
-  const isValidName = (value: string) =>
-    value.trim().length >= 2; // algo sencillo por ahora
+  const isValidName = (value: string) => value.trim().length >= 2;
 
   const isValidEmail = (value: string) => {
     if (!value.trim()) return false;
@@ -52,7 +52,7 @@ const RegisterScreen: React.FC<Props> = ({
 
   const isValidPhone = (value: string) => {
     const digits = value.replace(/\D/g, '');
-    return digits.length === 10; // por ahora 10 dígitos MX
+    return digits.length === 10; // 10 dígitos MX
   };
 
   const isValidPassword = (value: string) =>
@@ -89,7 +89,7 @@ const RegisterScreen: React.FC<Props> = ({
         phone: phone.trim(),
       });
 
-      // 2) Login inmediato para obtener token + user (que ya trae name)
+      // 2) Login inmediato para obtener token + user
       const { token, user } = await loginUser({
         email: trimmedEmail,
         password: trimmedPassword,
@@ -98,14 +98,12 @@ const RegisterScreen: React.FC<Props> = ({
       // 3) Guardar sesión en el dispositivo
       await saveAuthSession(token, user);
 
-      // 4) Avisar al padre (App.tsx) para ir a Dashboard
+      // 4) Ir al Dashboard
       onRegisterSuccess();
     } catch (err: any) {
       console.log('Error en registro:', err);
 
-      let msg =
-        'No pudimos crear tu cuenta. Intenta de nuevo.';
-
+      let msg = 'No pudimos crear tu cuenta. Intenta de nuevo.';
       if (err?.message?.includes('ya está registrado')) {
         msg = 'Este correo ya está registrado.';
       }
@@ -140,10 +138,14 @@ const RegisterScreen: React.FC<Props> = ({
               </TouchableOpacity>
             </View>
 
-            {/* CONTENIDO PRINCIPAL */}
+            {/* CONTENIDO + SCROLL */}
             <View style={styles.content}>
-              {/* Bloque superior: título + inputs */}
-              <View>
+              <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+              >
                 <Text style={styles.title}>
                   Continúa tu registro{'\n'}con tu correo y teléfono
                 </Text>
@@ -211,9 +213,7 @@ const RegisterScreen: React.FC<Props> = ({
 
                   <View style={styles.phoneRow}>
                     <View style={styles.prefixBox}>
-                      <Text style={styles.prefixText}>
-                        🇲🇽  +52
-                      </Text>
+                      <Text style={styles.prefixText}>🇲🇽  +52</Text>
                     </View>
                     <TextInput
                       style={styles.phoneInput}
@@ -262,11 +262,9 @@ const RegisterScreen: React.FC<Props> = ({
                     >
                       <Ionicons
                         name={
-                          secure
-                            ? 'eye-off-outline'
-                            : 'eye-outline'
+                          secure ? 'eye-off-outline' : 'eye-outline'
                         }
-                        size={20}
+                        size={22}
                         color={COLORS.muted}
                       />
                     </TouchableOpacity>
@@ -279,10 +277,20 @@ const RegisterScreen: React.FC<Props> = ({
                     <Text style={styles.errorText}>{errorMsg}</Text>
                   </View>
                 )}
-              </View>
 
-              {/* Bloque inferior: botón + aviso de privacidad */}
-              <View>
+                {/* Aviso de privacidad (dentro del scroll) */}
+                <Text style={styles.legalText}>
+                  Al continuar aceptas nuestro{' '}
+                  <Text style={styles.legalLink}>
+                    Aviso de privacidad
+                  </Text>{' '}
+                  y que HappyLife pueda contactarte cuando sea
+                  necesario.
+                </Text>
+              </ScrollView>
+
+              {/* CTA fijo abajo */}
+              <View style={styles.bottomArea}>
                 <TouchableOpacity
                   style={[
                     styles.primaryButton,
@@ -300,15 +308,6 @@ const RegisterScreen: React.FC<Props> = ({
                     </Text>
                   )}
                 </TouchableOpacity>
-
-                <Text style={styles.legalText}>
-                  Al continuar aceptas nuestro{' '}
-                  <Text style={styles.legalLink}>
-                    Aviso de privacidad
-                  </Text>{' '}
-                  y que HappyLife pueda contactarte cuando sea
-                  necesario.
-                </Text>
               </View>
             </View>
           </View>
@@ -327,7 +326,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 12,
   },
   headerRow: {
     height: 40,
@@ -341,49 +340,54 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Distribuimos mejor: arriba texto/inputs, abajo botón + legal
   content: {
     flex: 1,
-    justifyContent: 'space-between',
+  },
+
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 32,
   },
 
   title: {
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 30,
+    lineHeight: 36,
     fontWeight: '800',
     color: COLORS.text,
-    marginTop: 16,
+    marginTop: 20,
     marginRight: 24,
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: 16,
     lineHeight: 22,
     color: COLORS.muted,
-    marginTop: 12,
-    marginBottom: 24,
+    marginTop: 14,
+    marginBottom: 28,
   },
 
   fieldGroup: {
-    marginBottom: 22,
+    marginBottom: 26,
   },
   label: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: COLORS.text,
-    marginBottom: 6,
+    marginBottom: 8,
   },
   input: {
     borderBottomWidth: 1,
     borderBottomColor: '#dde3eb',
-    paddingVertical: 10,
-    fontSize: 15,
+    paddingVertical: 12,
+    fontSize: 16,
     color: COLORS.text,
   },
 
   phoneRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 6,
+    marginTop: 8,
   },
   prefixBox: {
     paddingHorizontal: 12,
@@ -396,7 +400,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   prefixText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     color: COLORS.text,
   },
@@ -404,8 +408,8 @@ const styles = StyleSheet.create({
     flex: 1,
     borderBottomWidth: 1,
     borderBottomColor: '#dde3eb',
-    paddingVertical: 10,
-    fontSize: 15,
+    paddingVertical: 12,
+    fontSize: 16,
     color: COLORS.text,
   },
 
@@ -417,8 +421,8 @@ const styles = StyleSheet.create({
     flex: 1,
     borderBottomWidth: 1,
     borderBottomColor: '#dde3eb',
-    paddingVertical: 10,
-    fontSize: 15,
+    paddingVertical: 12,
+    fontSize: 16,
     color: COLORS.text,
   },
   eyeButton: {
@@ -429,12 +433,30 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   errorText: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#DC2626',
   },
 
+  legalText: {
+    marginTop: 18,
+    fontSize: 13,
+    lineHeight: 20,
+    color: COLORS.muted,
+    textAlign: 'left',
+  },
+  legalLink: {
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+
+  // Zona inferior fija para el botón
+  bottomArea: {
+    paddingTop: 8,
+    paddingBottom: 8,
+    backgroundColor: '#FFFFFF',
+  },
+
   primaryButton: {
-    marginTop: 16,
     backgroundColor: COLORS.primary,
     borderRadius: 999,
     paddingVertical: 16,
@@ -447,18 +469,6 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
-  },
-
-  legalText: {
-    marginTop: 16,
-    fontSize: 12,
-    lineHeight: 18,
-    color: COLORS.muted,
-    textAlign: 'left',
-  },
-  legalLink: {
-    color: COLORS.primary,
     fontWeight: '600',
   },
 });
