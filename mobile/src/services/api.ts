@@ -1,5 +1,6 @@
 // mobile/src/services/api.ts
 import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const extra = Constants.expoConfig?.extra ?? {};
 const API_URL = (extra.API_URL as string | undefined)?.replace(/\/+$/, ''); // quitamos / final por si acaso
@@ -131,4 +132,13 @@ export async function loginUser(input: {
     body: JSON.stringify(input),
   });
   return body;
+}
+
+// 💾 Guardar sesión localmente (token + usuario)
+export async function saveAuthSession(
+  token: string,
+  user: AuthUser
+): Promise<void> {
+  await AsyncStorage.setItem('authToken', token);
+  await AsyncStorage.setItem('authUser', JSON.stringify(user));
 }
