@@ -17,6 +17,24 @@ import { COLORS } from '../theme/colors';
 import { useLanguage, Language } from '../context/LanguageContext';
 import type { AuthUser } from '../services/api';
 
+// 👉 Helper para mostrar el nombre con mayúscula en cada palabra
+function normalizeName(raw: string): string {
+  if (!raw) return '';
+  return raw
+    .normalize('NFC')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(word => {
+      const lower = word.toLocaleLowerCase('es-MX');
+      return (
+        lower.charAt(0).toLocaleUpperCase('es-MX') +
+        lower.slice(1)
+      );
+    })
+    .join(' ');
+}
+
 // Textos en ES / EN
 const STRINGS = {
   es: {
@@ -164,11 +182,14 @@ export default function SettingsScreen() {
     loadUser();
   }, []);
 
-  // 👇 Nombre bonito: name real > parte antes de @ > fallback del idioma
-  const displayName =
+  // 👇 Nombre bonito: usa name si existe, si no, parte antes de @, y todo normalizado
+  const baseName =
     (authUser?.name && authUser.name.trim().length > 0
-      ? authUser.name.trim()
-      : authUser?.email?.split('@')[0]) || t.nameValue;
+      ? authUser.name
+      : authUser?.email?.split('@')[0]) || '';
+
+  const displayName =
+    normalizeName(baseName) || t.nameValue;
 
   const displayEmail = authUser?.email || t.emailValue;
 
@@ -295,8 +316,12 @@ export default function SettingsScreen() {
 
           <View style={styles.rowBetween}>
             <View style={styles.textBlock}>
-              <Text style={styles.itemTitle}>{t.securityLockTitle}</Text>
-              <Text style={styles.itemSubtitle}>{t.securityDesc}</Text>
+              <Text style={styles.itemTitle}>
+                {t.securityLockTitle}
+              </Text>
+              <Text style={styles.itemSubtitle}>
+                {t.securityDesc}
+              </Text>
             </View>
             <Text style={styles.linkText}>{t.securityAction}</Text>
           </View>

@@ -27,6 +27,23 @@ type Props = {
   onBackToLogin: () => void;
 };
 
+// 👉 Helper para poner mayúscula a cada palabra del nombre
+function normalizeName(raw: string): string {
+  return raw
+    .normalize('NFC') // buena práctica para acentos
+    .trim()
+    .split(/\s+/) // separa por espacios múltiples
+    .filter(Boolean)
+    .map(word => {
+      const lower = word.toLocaleLowerCase('es-MX');
+      return (
+        lower.charAt(0).toLocaleUpperCase('es-MX') +
+        lower.slice(1)
+      );
+    })
+    .join(' ');
+}
+
 const RegisterScreen: React.FC<Props> = ({
   onRegisterSuccess,
   onBackToLogin,
@@ -77,13 +94,14 @@ const RegisterScreen: React.FC<Props> = ({
       setLoading(true);
       setErrorMsg(null);
 
-      const trimmedName = name.trim();
+      // 🔹 Normalizamos el nombre antes de mandarlo al backend
+      const normalizedName = normalizeName(name);
       const trimmedEmail = email.trim().toLowerCase();
       const trimmedPassword = password.trim();
 
-      // 1) Registrar usuario en backend (con nombre)
+      // 1) Registrar usuario en backend (con nombre normalizado)
       await registerUser({
-        name: trimmedName,
+        name: normalizedName,
         email: trimmedEmail,
         password: trimmedPassword,
         phone: phone.trim(),
@@ -161,7 +179,9 @@ const RegisterScreen: React.FC<Props> = ({
                     placeholder="Tu nombre"
                     placeholderTextColor="#b0bcc9"
                     value={name}
-                    onChangeText={setName}
+                    onChangeText={text =>
+                      setName(normalizeName(text))
+                    } // 👈 se normaliza mientras escribe
                     selectionColor={COLORS.primary}
                     editable={!loading}
                   />
@@ -262,7 +282,9 @@ const RegisterScreen: React.FC<Props> = ({
                     >
                       <Ionicons
                         name={
-                          secure ? 'eye-off-outline' : 'eye-outline'
+                          secure
+                            ? 'eye-off-outline'
+                            : 'eye-outline'
                         }
                         size={22}
                         color={COLORS.muted}
