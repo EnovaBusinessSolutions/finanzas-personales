@@ -3,8 +3,13 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const mongoose = require('mongoose');
 
 const app = express();
+
+// =========================
+// MIDDLEWARES BÁSICOS
+// =========================
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
@@ -76,14 +81,34 @@ app.get('/dashboard-demo', (_req, res) => {
 });
 
 // =========================
-// RUTAS EXISTENTES (BELVO / AUTH)
+// RUTAS (AUTH / BELVO / WEBHOOKS)
 // =========================
-app.use('/auth', require('./routes/auth'));
+
+// ⚠️ IMPORTANTE: ajusta la ruta del require según tu estructura real.
+// Si tu archivo está en backend/src/routes/auth.js usa './src/routes/auth'
+const authRoutes = require('./src/routes/auth');
+
+app.use('/api/auth', authRoutes); // 👈 ahora SÍ coincide con /api/auth/login
+
+// Si ya tienes estas rutas y archivos, las dejamos igual:
 app.use('/belvo', require('./routes/belvo'));
 app.post('/webhooks/belvo', require('./routes/webhooks/belvo'));
 
 // =========================
-// ARRANCAR SERVIDOR
+// CONEXIÓN A MONGO + ARRANQUE
 // =========================
-const port = process.env.PORT || 3001;
-app.listen(port, () => console.log('API en puerto', port));
+const port = process.env.PORT || 4000;              // que coincida con tu app.json
+const mongoUri = process.env.MONGODB_URI;           // debe estar en tu .env
+
+mongoose
+  .connect(mongoUri)
+  .then(() => {
+    console.log('✅ Conectado a MongoDB');
+    app.listen(port, () =>
+      console.log(`🚀 API escuchando en http://localhost:${port}`)
+    );
+  })
+  .catch((err) => {
+    console.error('❌ Error conectando a MongoDB', err);
+    process.exit(1);
+  });
