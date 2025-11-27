@@ -1,5 +1,5 @@
-// mobile/src/screens/Settings.tsx 
-import React, { useState } from 'react';
+// mobile/src/screens/Settings.tsx
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { COLORS } from '../theme/colors';
 import { useLanguage, Language } from '../context/LanguageContext';
+import type { AuthUser } from '../services/api';
 
 // Textos en ES / EN
 const STRINGS = {
@@ -55,7 +56,8 @@ const STRINGS = {
     cancelLabel: 'Cancelar',
     continueLabel: 'Continuar',
 
-    nameValue: 'Jose Manuel',
+    // Valores por defecto si no hay usuario guardado
+    nameValue: 'Usuario',
     emailValue: 'correo@ejemplo.com',
 
     // Cuenta / logout
@@ -100,7 +102,7 @@ const STRINGS = {
     cancelLabel: 'Cancel',
     continueLabel: 'Continue',
 
-    nameValue: 'Jose Manuel',
+    nameValue: 'User',
     emailValue: 'email@example.com',
 
     accountTitle: 'Account',
@@ -138,7 +140,31 @@ export default function SettingsScreen() {
   const [emailEnabled, setEmailEnabled] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+
   const t = STRINGS[language];
+
+  // 👇 Cargar usuario desde AsyncStorage al abrir Ajustes
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const raw = await AsyncStorage.getItem('authUser');
+        if (raw) {
+          const parsed: AuthUser = JSON.parse(raw);
+          setAuthUser(parsed);
+        }
+      } catch (err) {
+        console.log('No se pudo cargar authUser desde AsyncStorage:', err);
+      }
+    };
+
+    loadUser();
+  }, []);
+
+  // Nombre bonito a partir del email si no tenemos name real
+  const displayName =
+    authUser?.email?.split('@')[0] || t.nameValue;
+  const displayEmail = authUser?.email || t.emailValue;
 
   const handleSelectLanguage = (lang: Language) => {
     if (lang === language) return;
@@ -210,7 +236,7 @@ export default function SettingsScreen() {
           <View style={styles.rowBetween}>
             <View>
               <Text style={styles.itemTitle}>{t.nameLabel}</Text>
-              <Text style={styles.itemSubtitle}>{t.nameValue}</Text>
+              <Text style={styles.itemSubtitle}>{displayName}</Text>
             </View>
           </View>
 
@@ -219,7 +245,7 @@ export default function SettingsScreen() {
           <View style={styles.rowBetween}>
             <View>
               <Text style={styles.itemTitle}>{t.emailLabel}</Text>
-              <Text style={styles.itemSubtitle}>{t.emailValue}</Text>
+              <Text style={styles.itemSubtitle}>{displayEmail}</Text>
             </View>
           </View>
         </View>
@@ -487,13 +513,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // 🔵 Estilos nuevos del botón de cerrar sesión (look NU / Adnova)
+  // Botón cerrar sesión (ya azul pill)
   logoutButton: {
     marginTop: 6,
     borderRadius: 999,
     paddingVertical: 12,
     paddingHorizontal: 18,
-    backgroundColor: COLORS.primary, // mismo azul oscuro que los botones activos
+    backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -505,6 +531,6 @@ const styles = StyleSheet.create({
   logoutSubtext: {
     marginTop: 2,
     fontSize: 12,
-    color: '#E5E7EB', // gris clarito para contraste suave
+    color: '#E5E7EB',
   },
 });
