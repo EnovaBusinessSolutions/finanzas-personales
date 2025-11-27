@@ -22,7 +22,8 @@ type RootStackParamList = {
   Register: undefined;
   LoginEmail: undefined;
   Dashboard: undefined;
-  LoginPassword: undefined;
+  // 👉 Ahora LoginPassword recibe el email
+  LoginPassword: { email: string };
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LoginEmail'>;
@@ -37,10 +38,14 @@ const LoginEmailScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleNext = () => {
-  if (!isValidEmail(email)) return;
-  navigation.navigate('LoginPassword');
-};
+    if (!isValidEmail(email)) return;
 
+    // Normalizamos un poco el correo antes de enviarlo
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // 👉 Pasamos el email a la pantalla de contraseña
+    navigation.navigate('LoginPassword', { email: normalizedEmail });
+  };
 
   const canContinue = isValidEmail(email);
 
@@ -86,6 +91,8 @@ const LoginEmailScreen: React.FC<Props> = ({ navigation }) => {
                 autoCapitalize="none"
                 autoCorrect={false}
                 selectionColor={COLORS.primary}
+                returnKeyType="done"
+                onSubmitEditing={handleNext}
               />
             </View>
 

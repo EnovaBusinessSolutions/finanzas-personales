@@ -11,37 +11,63 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  ActivityIndicator,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { COLORS } from '../theme/colors';
+import { loginUser } from '../services/api';
 
+// 👇 mismo tipo que en LoginEmailScreen
 type RootStackParamList = {
   Splash: undefined;
   Auth: undefined;
   Register: undefined;
   LoginEmail: undefined;
-  LoginPassword: undefined;
+  LoginPassword: { email: string }; // recibe el correo
   Dashboard: undefined;
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LoginPassword'>;
 
-const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
+const LoginPasswordScreen: React.FC<Props> = ({ navigation, route }) => {
+  const { email } = route.params; // 👈 correo que viene de la pantalla anterior
+
   const [password, setPassword] = useState('');
   const [secure, setSecure] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const isValidPassword = (value: string) => value.trim().length >= 8;
 
-  const handleNext = () => {
-    if (!isValidPassword(password)) return;
+  const handleNext = async () => {
+    if (!isValidPassword(password) || loading) return;
 
-    // ✅ Cuando la contraseña es válida y el botón está habilitado,
-    // al tocar la flecha se va al Dashboard
-    navigation.replace('Dashboard');
+    try {
+      setLoading(true);
+      setErrorMsg(null);
+
+      // Llamamos a la API real de login
+      await loginUser({email,password: password.trim(),});
+
+      // Más adelante aquí puedes guardar token en AsyncStorage, etc.
+
+      // Reset de navegación para entrar a la app y que no pueda volver al login con “back”
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Dashboard' }],
+      });
+    } catch (err: any) {
+      console.log('Error en login:', err);
+      setErrorMsg(
+        'Correo o contraseña incorrectos. Intenta de nuevo.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const canContinue = isValidPassword(password);
+  const canContinue = isValidPassword(password) && !loading;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -53,7 +79,10 @@ const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.container}>
             {/* Header superior (flecha atrás) */}
             <View style={styles.headerRow}>
-              <TouchableOpacity onPress={() => navigation.goBack()}>
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                disabled={loading}
+              >
                 <Ionicons
                   name="chevron-back"
                   size={24}
@@ -82,12 +111,16 @@ const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
                   autoCapitalize="none"
                   autoCorrect={false}
                   selectionColor={COLORS.primary}
+                  editable={!loading}
+                  returnKeyType="done"
+                  onSubmitEditing={handleNext}
                 />
 
                 {/* Ojo mostrar/ocultar */}
                 <TouchableOpacity
                   onPress={() => setSecure(prev => !prev)}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  disabled={loading}
                 >
                   <Ionicons
                     name={secure ? 'eye-off-outline' : 'eye-outline'}
@@ -101,12 +134,20 @@ const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
               <View style={styles.bottomLine} />
             </View>
 
+            {/* Mensaje de error */}
+            {errorMsg && (
+              <View style={styles.errorWrapper}>
+                <Text style={styles.errorText}>{errorMsg}</Text>
+              </View>
+            )}
+
             {/* Olvidé la contraseña */}
             <TouchableOpacity
               style={styles.forgotWrapper}
               onPress={() => {
-                // Aquí luego metemos flujo de recuperación
+                // TODO: flujo de recuperación de contraseña
               }}
+              disabled={loading}
             >
               <Text style={styles.forgotText}>
                 Olvidé la contraseña  →
@@ -115,16 +156,23 @@ const LoginPasswordScreen: React.FC<Props> = ({ navigation }) => {
 
             {/* Botón flotante de flecha */}
             <TouchableOpacity
-              style={[styles.fab, !canContinue && styles.fabDisabled]}
+              style={[
+                styles.fab,
+                !canContinue && styles.fabDisabled,
+              ]}
               onPress={handleNext}
               activeOpacity={0.8}
               disabled={!canContinue}
             >
-              <Ionicons
-                name="arrow-forward"
-                size={26}
-                color={canContinue ? '#FFFFFF' : '#9CA3AF'}
-              />
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Ionicons
+                  name="arrow-forward"
+                  size={26}
+                  color={canContinue ? '#FFFFFF' : '#9CA3AF'}
+                />
+              )}
             </TouchableOpacity>
           </View>
         </TouchableWithoutFeedback>
@@ -177,13 +225,21 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: '#E5E7EB',
   },
+  errorWrapper: {
+    marginTop: 12,
+    paddingHorizontal: 20,
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 13,
+  },
   forgotWrapper: {
     marginTop: 24,
     paddingHorizontal: 20,
   },
   forgotText: {
     fontSize: 15,
-    color: COLORS.primary, // 👈 ahora usa el color principal de tu app
+    color: COLORS.primary,
     fontWeight: '600',
   },
   fab: {

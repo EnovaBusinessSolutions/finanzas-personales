@@ -8,7 +8,7 @@ import SettingsScreen from './src/screens/Settings';
 import SplashScreen from './src/screens/SplashScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import RegisterScreen from './src/screens/RegisterScreen'; // 🔹 registro
-import LoginEmailScreen from './src/screens/LoginEmailScreen'; // 🔹 nueva pantalla login
+import LoginEmailScreen from './src/screens/LoginEmailScreen'; // 🔹 pantalla login (correo)
 import LoginPasswordScreen from './src/screens/LoginPasswordScreen'; // 🔹 pantalla contraseña
 
 import BottomMenu, { BottomTabKey } from './src/components/BottomMenu';
@@ -23,9 +23,9 @@ export type RootStackParamList = {
   Splash: undefined;
   Auth: undefined;
   LoginEmail: undefined;
-  LoginPassword: undefined;    // 👈 aquí también
+  LoginPassword: { email: string };   // 👈 aquí recibe el correo
   Register: undefined;
-  Dashboard: undefined;        // aquí vive el layout con BottomMenu
+  Dashboard: undefined;               // aquí vive el layout con BottomMenu
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -90,7 +90,9 @@ export default function App() {
             {/* 1) Mientras no termine el splash, solo existe esta pantalla */}
             {!isSplashDone ? (
               <Stack.Screen name="Splash">
-                {() => <SplashScreen onFinish={() => setIsSplashDone(true)} />}
+                {() => (
+                  <SplashScreen onFinish={() => setIsSplashDone(true)} />
+                )}
               </Stack.Screen>
             ) : (
               <>
@@ -109,12 +111,14 @@ export default function App() {
                   component={LoginPasswordScreen}
                 />
 
-                {/* 2D) Pantalla de registro tipo NU (usa tus props actuales) */}
+                {/* 2D) Pantalla de registro tipo NU */}
                 <Stack.Screen name="Register">
                   {({ navigation }) => (
                     <RegisterScreen
                       // después de registrar, entra directo al dashboard
-                      onRegisterSuccess={() => navigation.replace('Dashboard')}
+                      onRegisterSuccess={() =>
+                        navigation.replace('Dashboard')
+                      }
                       // volver a Auth
                       onBackToLogin={() => navigation.goBack()}
                     />

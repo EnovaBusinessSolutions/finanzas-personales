@@ -2,77 +2,126 @@
 import Constants from 'expo-constants';
 
 const extra = Constants.expoConfig?.extra ?? {};
-const API_URL = extra.API_URL as string | undefined;
+const API_URL = (extra.API_URL as string | undefined)?.replace(/\/+$/, ''); // quitamos / final por si acaso
 
 if (!API_URL) {
   console.warn('⚠️ API_URL no está configurado en app.json');
 }
 
-export async function testApi() {
+// --- Helper general para hacer requests JSON ---
+async function request<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
   if (!API_URL) {
     throw new Error('API_URL no está configurado');
   }
 
-  const res = await fetch(`${API_URL}/health`);
+  const url = `${API_URL}${path}`;
 
-  if (!res.ok) {
-    throw new Error(`Error HTTP ${res.status}`);
+  const res = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+    ...options,
+  });
+
+  let body: any = null;
+  try {
+    body = await res.json();
+  } catch {
+    // puede que no venga JSON; lo ignoramos
   }
 
-  const data = await res.json();
-  return data;
+  if (!res.ok) {
+    const message =
+      body?.message ||
+      body?.error ||
+      `Error HTTP ${res.status} al llamar a ${path}`;
+    throw new Error(message);
+  }
+
+  return body as T;
+}
+
+// =====================
+//      TIPOS
+// =====================
+
+export type MovimientoDemo = {
+  id: number;
+  fecha: string;
+  descripcion: string;
+  categoria: string;
+  monto: number;
+};
+
+export type DashboardDemoResponse = {
+  ok: boolean;
+  resumen: {
+    ingresos: number;
+    gastos: number;
+    saldo: number;
+  };
+  movimientos: MovimientoDemo[];
+};
+
+export type AuthUser = {
+  id: string;
+  email: string;
+  phone?: string;
+  createdAt: string;
+};
+
+// =====================
+//   ENDPOINTS EXISTENTES
+// =====================
+
+export async function testApi() {
+  // GET /health
+  return request<{ ok: boolean }>('/health');
 }
 
 export async function getMovimientosDemo() {
-  if (!API_URL) {
-    throw new Error('API_URL no está configurado');
-  }
-
-  const res = await fetch(`${API_URL}/movimientos-demo`);
-
-  if (!res.ok) {
-    throw new Error(`Error HTTP ${res.status}`);
-  }
-
-  const json = await res.json();
-
-  // json = { ok: true, data: [...] }
-  return json.data as Array<{
-    id: number;
-    fecha: string;
-    descripcion: string;
-    categoria: string;
-    monto: number;
-  }>;
+  // GET /movimientos-demo
+  const json = await request<{ ok: boolean; data: MovimientoDemo[] }>(
+    '/movimientos-demo'
+  );
+  return json.data;
 }
 
 export async function getDashboardDemo() {
-  if (!API_URL) {
-    throw new Error('API_URL no está configurado');
-  }
+  // GET /dashboard-demo
+  const json = await request<DashboardDemoResponse>('/dashboard-demo');
+  return json;
+}
 
-  const res = await fetch(`${API_URL}/dashboard-demo`);
+// =====================
+//   AUTENTICACIÓN
+// =====================
 
-  if (!res.ok) {
-    throw new Error(`Error HTTP ${res.status}`);
-  }
+// POST /api/auth/register
+export async function registerUser(input: {
+  email: string;
+  password: string;
+  phone: string;
+}): Promise<AuthUser> {
+  const body = await request<AuthUser>('/api/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+  return body;
+}
 
-  const json = await res.json();
-
-  // json = { ok, resumen, movimientos }
-  return json as {
-    ok: boolean;
-    resumen: {
-      ingresos: number;
-      gastos: number;
-      saldo: number;
-    };
-    movimientos: Array<{
-      id: number;
-      fecha: string;
-      descripcion: string;
-      categoria: string;
-      monto: number;
-    }>;
-  };
+// POST /api/auth/login
+export async function loginUser(input: {
+  email: string;
+  password: string;
+}): Promise<AuthUser> {
+  const body = await request<AuthUser>('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+  return body;
 }
