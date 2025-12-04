@@ -4,23 +4,35 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
-const authRoutes = require('./src/routes/auth'); // 👈 ruta al router de auth
+// 🔐 Rutas de autenticación
+const authRoutes = require('./src/routes/auth');
+
+// 💳 Rutas de Belvo (API para tu app)
+const belvoRoutes = require('./src/routes/belvo');
+
+// 📩 Webhook de Belvo (para que Belvo nos llame)
+const belvoWebhook = require('./src/routes/webhooks/belvo');
 
 const app = express();
 
 // Middlewares
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); // parsea JSON del body
 
 // Rutas públicas de prueba
 app.get('/health', (req, res) => {
   res.json({ ok: true });
 });
 
-// 👇 IMPORTANTE: aquí montamos las rutas de auth
+// 👇 Auth
 app.use('/api/auth', authRoutes);
-// Eso significa que dentro de auth.js debes tener router.post('/login', ...)
-// y router.post('/register', ...)
+// Dentro de auth.js tienes router.post('/login', ...) y router.post('/register', ...)
+
+// 👇 Belvo API (tu app móvil hablará con esto)
+app.use('/api/belvo', belvoRoutes);
+
+// 👇 Webhook Belvo (URL que configurarás en el panel de Belvo)
+app.use('/webhooks/belvo', belvoWebhook);
 
 // Conexión a Mongo y arranque del servidor
 const PORT = process.env.PORT || 4000;
