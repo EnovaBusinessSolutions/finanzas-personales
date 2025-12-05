@@ -20,10 +20,7 @@ if (!BELVO_SECRET_ID || !BELVO_SECRET_PASSWORD) {
 console.log('🔗 Belvo apuntando a:', BELVO_BASE_URL);
 
 /**
- * Handler reutilizable para crear el token del widget.
- * Lo usamos en:
- *  - POST /api/belvo/widget-token
- *  - POST /api/belvo/link-token
+ * Función reutilizable para crear el token del widget.
  */
 async function createWidgetToken(req, res) {
   try {
@@ -34,24 +31,21 @@ async function createWidgetToken(req, res) {
       });
     }
 
-    const { userId, linkId } = req.body || {};
+    const { userId } = req.body || {};
     const externalId = userId ? `user-${userId}` : 'demo-user';
-
-    // Payload según la doc actual de Belvo:
-    // https://developers.belvo.com/docs/connect-widget
-    const payload = {
-      id: BELVO_SECRET_ID,
-      password: BELVO_SECRET_PASSWORD,
-      // Scopes válidos para el widget
-      scopes: 'read_institutions,write_links,read_links',
-    };
-
-    if (externalId) payload.external_id = externalId;
-    if (linkId) payload.link_id = linkId; // útil para "update mode"
 
     const response = await axios.post(
       `${BELVO_BASE_URL}/api/token/`,
-      payload,
+      {
+        id: BELVO_SECRET_ID,
+        password: BELVO_SECRET_PASSWORD,
+        external_id: externalId,
+        // Scopes mínimos para banca
+        scopes:
+          'read_institutions,write_links,read_accounts,read_transactions,read_owners,read_balances',
+        fetch_historical: true,
+        fetch_resources: ['ACCOUNTS', 'OWNERS', 'TRANSACTIONS'],
+      },
       {
         headers: {
           'Content-Type': 'application/json',
@@ -60,7 +54,6 @@ async function createWidgetToken(req, res) {
       }
     );
 
-    // Belvo responde algo tipo { access: '...', refresh: '...' }
     return res.json({
       access: response.data.access,
       refresh: response.data.refresh,
@@ -80,15 +73,77 @@ async function createWidgetToken(req, res) {
 
 /**
  * POST /api/belvo/widget-token
- * POST /api/belvo/link-token  (alias – para que tus pruebas anteriores sigan funcionando)
+ * POST /api/belvo/link-token (alias)
  */
 router.post('/widget-token', createWidgetToken);
 router.post('/link-token', createWidgetToken);
 
 /**
- * GET /api/belvo/accounts?linkId=XXXX
+ * SOLO DESARROLLO:
+ * POST /api/belvo/sandbox/create-link
  *
- * Trae cuentas para un link concreto usando Basic Auth (ID + PASSWORD).
+ * Crea un link de sandbox (banco de pruebas) en Belvo.
+ * Body de ejemplo:
+ * {
+ *   "institution": "CODIGO_INSTITUCION_SANDBOX",
+ *   "username": "usuario_sandbox",
+ *   "password": "password_sandbox"
+ * }
+ */
+router.post('/sandbox/create-link', async (req, res) => {
+  try {
+    const { institution, username, password } = req.body || {};
+
+    if (!institution || !username || !password) {
+      return res.status(400).json({
+        message:
+          'Debes enviar institution, username y password en el body para crear el link de sandbox',
+      });
+    }
+
+    if (!BELVO_SECRET_ID || !BELVO_SECRET_PASSWORD) {
+      return res.status(500).json({
+        message:
+          'Belvo no está configurado. Revisa BELVO_SECRET_ID y BELVO_SECRET_PASSWORD en el .env',
+      });
+    }
+
+    const response = await axios.post(
+      `${BELVO_BASE_URL}/api/links/`,
+      {
+        institution,
+        username,
+        password,
+      },
+      {
+        auth: {
+          username: BELVO_SECRET_ID,
+          password: BELVO_SECRET_PASSWORD,
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      }
+    );
+
+    // Aquí viene el link con su id
+    return res.json(response.data);
+  } catch (err) {
+    console.error(
+      'Error creando link de sandbox en Belvo:',
+      err.response?.data || err.message
+    );
+
+    return res.status(500).json({
+      message: 'No pudimos crear el link de sandbox en Belvo',
+      error: err.response?.data || err.message,
+    });
+  }
+});
+
+/**
+ * GET /api/belvo/accounts?linkId=XXXX
  */
 router.get('/accounts', async (req, res) => {
   try {
@@ -130,8 +185,6 @@ router.get('/accounts', async (req, res) => {
 
 /**
  * GET /api/belvo/transactions?linkId=XXXX&date_from=YYYY-MM-DD&date_to=YYYY-MM-DD
- *
- * Trae transacciones para un link concreto.
  */
 router.get('/transactions', async (req, res) => {
   try {
