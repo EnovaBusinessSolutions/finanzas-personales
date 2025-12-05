@@ -21,6 +21,9 @@ console.log('🔗 Belvo apuntando a:', BELVO_BASE_URL);
 
 /**
  * Handler reutilizable para crear el token del widget.
+ * Lo usamos en:
+ *  - POST /api/belvo/widget-token
+ *  - POST /api/belvo/link-token
  */
 async function createWidgetToken(req, res) {
   try {
@@ -31,21 +34,24 @@ async function createWidgetToken(req, res) {
       });
     }
 
-    const { userId } = req.body || {};
+    const { userId, linkId } = req.body || {};
     const externalId = userId ? `user-${userId}` : 'demo-user';
+
+    // Payload según la doc actual de Belvo:
+    // https://developers.belvo.com/docs/connect-widget
+    const payload = {
+      id: BELVO_SECRET_ID,
+      password: BELVO_SECRET_PASSWORD,
+      // Scopes válidos para el widget
+      scopes: 'read_institutions,write_links,read_links',
+    };
+
+    if (externalId) payload.external_id = externalId;
+    if (linkId) payload.link_id = linkId; // útil para "update mode"
 
     const response = await axios.post(
       `${BELVO_BASE_URL}/api/token/`,
-      {
-        id: BELVO_SECRET_ID,
-        password: BELVO_SECRET_PASSWORD,
-        external_id: externalId,
-        // Scopes mínimos para banca. Ajusta según lo que necesites.
-        scopes:
-          'read_institutions,write_links,read_accounts,read_transactions,read_owners,read_balances',
-        fetch_historical: true,
-        fetch_resources: ['ACCOUNTS', 'OWNERS', 'TRANSACTIONS'],
-      },
+      payload,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -81,6 +87,8 @@ router.post('/link-token', createWidgetToken);
 
 /**
  * GET /api/belvo/accounts?linkId=XXXX
+ *
+ * Trae cuentas para un link concreto usando Basic Auth (ID + PASSWORD).
  */
 router.get('/accounts', async (req, res) => {
   try {
@@ -122,6 +130,8 @@ router.get('/accounts', async (req, res) => {
 
 /**
  * GET /api/belvo/transactions?linkId=XXXX&date_from=YYYY-MM-DD&date_to=YYYY-MM-DD
+ *
+ * Trae transacciones para un link concreto.
  */
 router.get('/transactions', async (req, res) => {
   try {
